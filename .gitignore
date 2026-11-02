@@ -1,0 +1,10 @@
+# Lo que NO debe ir al zip de entrega (enunciado p.8: build/dist = -4 puntos)
+HighScores/build/
+HighScores/dist/
+# Configuración local de NetBeans (rutas de tu PC)
+HighScores/nbproject/private/
+# Base de datos H2 y logs generados al ejecutar
+HighScores/data/server/database/*.db
+HighScores/log/
+# Clases compiladas por __Compilar-en-Windows_javac.bat
+_compilado/
