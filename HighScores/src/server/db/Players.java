@@ -39,14 +39,79 @@ public final class Players {
 
   }
 
-  public boolean newPlayer (final String name) throws SQLException {
+    /* 1) Voy a comprobar si el jugador existe por su nombre */
+    /* logicamente si no esta registrado devuevlo false*/
+    /* 2) Usar un bucle para veriricar un ID que no este en la */
+    /* base de datos */
+    /* 3) Ahora insertamos al jugador */
+  public boolean newPlayer (final String name) throws SQLException 
+  {
 
     // Si el jugadr ya está registrado, se devuelve false.
 
     // El identificador de un jugador se pide al método getRandomId().
     // Es necesario un bucle que vaya generando identificadores hasta
     // dar con uno que todavía no haya sido empleado.
-
+    
+    String identificadorJugador;
+    boolean existeYaElIdentificador;
+    
+    final String consultaComprobarNuevoJugador;
+    final String consultaComprobaridJugador;
+    final String consultarInsertarJugador;
+    
+    consultaComprobarNuevoJugador = "select count(*) from Players where PlayerName=?";
+    consultaComprobaridJugador = "select count(*) from Players where PlayerId = ?";
+    consultarInsertarJugador = "insert into Players(PlayerId, PlayerName) values (?, ?)";
+    
+    try(final PreparedStatement preparedStatementNuevoJugador = connection.prepareStatement(consultaComprobarNuevoJugador))
+    {
+        preparedStatementNuevoJugador.setString(1, name);
+        try (ResultSet resultadoConsulta = preparedStatementNuevoJugador.executeQuery())
+        {
+            if (
+                    resultadoConsulta.next() 
+                    &&
+                    resultadoConsulta.getInt(1) > 0
+               )
+            {
+                return false;
+            }
+        }
+    }
+    
+    try(final PreparedStatement preparedStatementIdJugador = connection.prepareStatement(consultaComprobaridJugador))
+    {
+        do
+        {
+            identificadorJugador = getRandomId();
+            preparedStatementIdJugador.setString(1, identificadorJugador);
+            
+            
+            try(ResultSet resultadoConsulta = preparedStatementIdJugador.executeQuery())
+            {
+                if (
+                    resultadoConsulta.next() 
+                    &&
+                    resultadoConsulta.getInt(1) > 0
+                   )
+                {
+                    existeYaElIdentificador = true;
+                }
+                else
+                {
+                    existeYaElIdentificador = false;
+                }
+            }
+        }while(existeYaElIdentificador);
+    }
+    try (PreparedStatement preparedStatementInsertarJugador = connection.prepareStatement(consultarInsertarJugador))
+    {
+        preparedStatementInsertarJugador.setString(1, identificadorJugador);
+        preparedStatementInsertarJugador.setString(2, name);
+        preparedStatementInsertarJugador.executeUpdate();
+    }
+      return true;
   }
 
   public List<String> getPlayers () throws SQLException {
