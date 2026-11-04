@@ -59,7 +59,7 @@ public final class Players {
   String getPlayerId (final String name) throws SQLException {
 
     String consultarNombreJugadorSQL;
-    consultarNombreJugadorSQL = "select PlayerId from PlayerName where name =?";
+    consultarNombreJugadorSQL = "select PlayerId from PlayerName where PlayerName =?";
     
     java.sql.PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL);
     
@@ -70,7 +70,7 @@ public final class Players {
     if (resultadoBusqueda.next())
     {
         String idJugador;
-        idJugador = resultadoBusqueda.getString("id");
+        idJugador = resultadoBusqueda.getString("PlayerId");
         resultadoBusqueda.close();
         preparedStatementJugador.close();
         return idJugador;
