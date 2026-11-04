@@ -73,6 +73,8 @@ public final class Players {
      * Genero ids al azar hasta que pueda encontrar uno que no
      * tenga ningun jugador, osea, que getPlayerName me devuelva ""
      */
+    
+    /* Esquema de recorrido */
     identificadorJugador = getRandomId();
     while(!getPlayerName(identificadorJugador).isEmpty())
     {
