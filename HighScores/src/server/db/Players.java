@@ -57,7 +57,8 @@ public final class Players {
     return players;
   }
 
-  String getPlayerId (final String name) throws SQLException {
+  String getPlayerId (final String name) throws SQLException 
+  {
 
     final String consultarNombreJugadorSQL;
     consultarNombreJugadorSQL = "select PlayerId from Players where PlayerName =?";
@@ -86,10 +87,33 @@ public final class Players {
     }
   }
 
-  String getPlayerName (final String playerId) throws SQLException {
-
-    // TODO
-
+  String getPlayerName (final String playerId) throws SQLException /* Un semi copypaste del metodo anterior */
+  {
+    final String consultarNombreJugadorSQL;
+    consultarNombreJugadorSQL = "select PlayerName from Players where PlayerId=?";
+    
+    try(final PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL))
+    {
+        preparedStatementJugador.setString(1, playerId);
+        
+        try (final ResultSet resultadoBusqueda = preparedStatementJugador.executeQuery())
+        {
+            if (resultadoBusqueda.next())
+            {
+                final String nombreJugador;
+                nombreJugador = resultadoBusqueda.getString("PlayerName");
+                return nombreJugador;
+            }
+            else
+            {
+                return "";
+            }
+        }
+    }catch (final SQLException e)
+    {
+        LOGGER.log(Level.SEVERE, "consulta mal ejecutada: busqueda del nombre del jugador ", e);
+        throw e;
+    }
   }
 
 }
