@@ -59,8 +59,6 @@ public final class Players {
     final String consultaComprobaridJugador;
     final String consultarInsertarJugador;
     
-    consultaComprobarNuevoJugador = "select count(*) from Players where PlayerName=?";
-    consultaComprobaridJugador = "select count(*) from Players where PlayerId = ?";
     consultarInsertarJugador = "insert into Players(PlayerId, PlayerName) values (?, ?)";
     
     /**
@@ -74,11 +72,16 @@ public final class Players {
         return false;
     }
     
+    /**
+     * Generamos el id del jugador siempre y cuando
+     * al comprobar que el nombre del jugador existe
+     * en caso contrario, si nos devuelve "", continuaremos
+     */
     do
     {
         identificadorJugador = getRandomId();
        
-    }while(!" ".equalsIgnoreCase(identificadorJugador));
+    }while(!" ".equalsIgnoreCase(getPlayerName(identificadorJugador)));
     
     try (PreparedStatement preparedStatementInsertarJugador = connection.prepareStatement(consultarInsertarJugador))
     {
