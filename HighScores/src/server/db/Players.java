@@ -79,7 +79,7 @@ public final class Players {
     {
         resultadoBusqueda.close();
         preparedStatementJugador.close();
-        return null;
+        return "";
     }
     
     
