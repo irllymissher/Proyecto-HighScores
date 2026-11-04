@@ -114,7 +114,8 @@ public final class Players {
             players.add(nombreDelJugador);
         }
         return players;
-    }catch (final SQLException e) 
+    }
+    catch (final SQLException e) 
     {
         LOGGER.log(Level.SEVERE, "Fallo al obtener la lista de todos los jugadores", e);
         throw e;
