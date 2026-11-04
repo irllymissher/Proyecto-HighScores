@@ -58,8 +58,31 @@ public final class Players {
 
   String getPlayerId (final String name) throws SQLException {
 
-    // TODO
-
+    String consultarNombreJugadorSQL;
+    consultarNombreJugadorSQL = "select PlayerId from PlayerName where name =?";
+    
+    java.sql.PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL);
+    
+    preparedStatementJugador.setString(1, name);
+    
+    ResultSet resultadoBusqueda = preparedStatementJugador.executeQuery();
+    
+    if (resultadoBusqueda.next())
+    {
+        String idJugador;
+        idJugador = resultadoBusqueda.getString("id");
+        resultadoBusqueda.close();
+        preparedStatementJugador.close();
+        return idJugador;
+    }
+    else
+    {
+        resultadoBusqueda.close();
+        preparedStatementJugador.close();
+        return null;
+    }
+    
+    
   }
 
   String getPlayerName (final String playerId) throws SQLException {
