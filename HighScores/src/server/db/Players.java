@@ -154,7 +154,7 @@ public final class Players {
     }
   }
 
-  String getPlayerName (final String playerId) throws SQLException /* Un semi copypaste del metodo anterior */
+  String getPlayerName (final String playerId) throws SQLException /* analogo al metodo anterior */
   {
     final String consultarNombreJugadorSQL;
     consultarNombreJugadorSQL = "select PlayerName from Players where PlayerId=?";
