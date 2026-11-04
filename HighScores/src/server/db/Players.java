@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.sql.PreparedStatement;
 //
 public final class Players {
 
@@ -58,41 +59,31 @@ public final class Players {
 
   String getPlayerId (final String name) throws SQLException {
 
-    String consultarNombreJugadorSQL;
+    final String consultarNombreJugadorSQL;
     consultarNombreJugadorSQL = "select PlayerId from Players where PlayerName =?";
     
-    try(java.sql.PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL))
+    try(final PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL))
     {
         preparedStatementJugador.setString(1, name);
         
-        try (ResultSet resultadoBusqueda = preparedStatementJugador.executeQuery())
+        try (final ResultSet resultadoBusqueda = preparedStatementJugador.executeQuery())
         {
             if (resultadoBusqueda.next())
             {
-                String idJugador;
+                final String idJugador;
                 idJugador = resultadoBusqueda.getString("PlayerId");
                 return idJugador;
             }
             else
             {
-                resultadoBusqueda.close();
                 return "";
             }
         }
-    }catch (SQLException e)
+    }catch (final SQLException e)
     {
-        LOGGER.log(Level.SEVERE, "consulta mal ejecutada", e);
+        LOGGER.log(Level.SEVERE, "consulta mal ejecutada: busqueda id del nombre del jugador ", e);
         throw e;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
   }
 
   String getPlayerName (final String playerId) throws SQLException {
