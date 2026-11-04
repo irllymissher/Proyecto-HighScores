@@ -64,7 +64,7 @@ public final class Players {
     * el id si existe y si no pues vacio
     * logicamente si existe entonces devuelvo falso
     */
-    if (! "".equalsIgnoreCase(getPlayerId(name)))
+    if (!(getPlayerId(name).isEmpty()))
     {
         return false;
     }
@@ -73,11 +73,11 @@ public final class Players {
      * Genero ids al azar hasta que pueda encontrar uno que no
      * tenga ningun jugador, osea, que getPlayerName me devuelva ""
      */
-    do
+    identificadorJugador = getRandomId();
+    while(!getPlayerName(identificadorJugador).isEmpty())
     {
         identificadorJugador = getRandomId();
-       
-    }while(! "".equalsIgnoreCase(getPlayerName(identificadorJugador)));
+    }
     
     try (final PreparedStatement preparedStatementInsertarJugador = connection.prepareStatement(consultarInsertarJugador))
     {
@@ -89,8 +89,9 @@ public final class Players {
          * la tabla o no , verifico las filas que han sido modificadas por el insert
          * si sale mayor que cero entonces algo fue modificado, si no pues nada
         */
-        final int filasAfectadas = preparedStatementInsertarJugador.executeUpdate();
-        return filasAfectadas>0;
+        final int filasAfectada;
+        filasAfectada = preparedStatementInsertarJugador.executeUpdate();
+        return filasAfectada>0;
     }
     catch (final SQLException e) 
     {
