@@ -54,7 +54,6 @@ public final class Players {
     // dar con uno que todavía no haya sido empleado.
     
     String identificadorJugador;
-    boolean existeYaElIdentificador;
     
     final String consultaComprobarNuevoJugador;
     final String consultaComprobaridJugador;
@@ -64,47 +63,23 @@ public final class Players {
     consultaComprobaridJugador = "select count(*) from Players where PlayerId = ?";
     consultarInsertarJugador = "insert into Players(PlayerId, PlayerName) values (?, ?)";
     
-    try(final PreparedStatement preparedStatementNuevoJugador = connection.prepareStatement(consultaComprobarNuevoJugador))
+    /**
+        * En vez de crear un try-catch puedo reutilizar el metodo
+        * que he creado. Al llamar a getPlayerId me va a devolver
+        * el id si existe y si no pues vacio
+        * logicamente si existe entonces devuelvo falso
+    */
+    if (! "".equalsIgnoreCase(getPlayerId(name)))
     {
-        preparedStatementNuevoJugador.setString(1, name);
-        try (ResultSet resultadoConsulta = preparedStatementNuevoJugador.executeQuery())
-        {
-            if (
-                    resultadoConsulta.next() 
-                    &&
-                    resultadoConsulta.getInt(1) > 0
-               )
-            {
-                return false;
-            }
-        }
+        return false;
     }
     
-    try(final PreparedStatement preparedStatementIdJugador = connection.prepareStatement(consultaComprobaridJugador))
+    do
     {
-        do
-        {
-            identificadorJugador = getRandomId();
-            preparedStatementIdJugador.setString(1, identificadorJugador);
-            
-            
-            try(ResultSet resultadoConsulta = preparedStatementIdJugador.executeQuery())
-            {
-                if (
-                    resultadoConsulta.next() 
-                    &&
-                    resultadoConsulta.getInt(1) > 0
-                   )
-                {
-                    existeYaElIdentificador = true;
-                }
-                else
-                {
-                    existeYaElIdentificador = false;
-                }
-            }
-        }while(existeYaElIdentificador);
-    }
+        identificadorJugador = getRandomId();
+       
+    }while(!" ".equalsIgnoreCase(identificadorJugador));
+    
     try (PreparedStatement preparedStatementInsertarJugador = connection.prepareStatement(consultarInsertarJugador))
     {
         preparedStatementInsertarJugador.setString(1, identificadorJugador);
