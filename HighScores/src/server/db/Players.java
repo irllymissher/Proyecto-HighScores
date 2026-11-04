@@ -59,28 +59,38 @@ public final class Players {
   String getPlayerId (final String name) throws SQLException {
 
     String consultarNombreJugadorSQL;
-    consultarNombreJugadorSQL = "select PlayerId from PlayerName where PlayerName =?";
+    consultarNombreJugadorSQL = "select PlayerId from Players where PlayerName =?";
     
-    java.sql.PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL);
-    
-    preparedStatementJugador.setString(1, name);
-    
-    ResultSet resultadoBusqueda = preparedStatementJugador.executeQuery();
-    
-    if (resultadoBusqueda.next())
+    try(java.sql.PreparedStatement preparedStatementJugador = connection.prepareStatement(consultarNombreJugadorSQL))
     {
-        String idJugador;
-        idJugador = resultadoBusqueda.getString("PlayerId");
-        resultadoBusqueda.close();
-        preparedStatementJugador.close();
-        return idJugador;
-    }
-    else
+        preparedStatementJugador.setString(1, name);
+        
+        try (ResultSet resultadoBusqueda = preparedStatementJugador.executeQuery())
+        {
+            if (resultadoBusqueda.next())
+            {
+                String idJugador;
+                idJugador = resultadoBusqueda.getString("PlayerId");
+                return idJugador;
+            }
+            else
+            {
+                resultadoBusqueda.close();
+                return "";
+            }
+        }
+    }catch (SQLException e)
     {
-        resultadoBusqueda.close();
-        preparedStatementJugador.close();
-        return "";
+        LOGGER.log(Level.SEVERE, "consulta mal ejecutada", e);
+        throw e;
     }
+    
+    
+    
+    
+    
+    
+    
     
     
   }
