@@ -55,17 +55,14 @@ public final class Players {
     
     String identificadorJugador;
     
-    final String consultaComprobarNuevoJugador;
-    final String consultaComprobaridJugador;
     final String consultarInsertarJugador;
-    
     consultarInsertarJugador = "insert into Players(PlayerId, PlayerName) values (?, ?)";
     
     /**
-        * En vez de crear un try-catch puedo reutilizar el metodo
-        * que he creado. Al llamar a getPlayerId me va a devolver
-        * el id si existe y si no pues vacio
-        * logicamente si existe entonces devuelvo falso
+    * En vez de crear un try-catch puedo reutilizar el metodo
+    * que he creado. Al llamar a getPlayerId me va a devolver
+    * el id si existe y si no pues vacio
+    * logicamente si existe entonces devuelvo falso
     */
     if (! "".equalsIgnoreCase(getPlayerId(name)))
     {
@@ -73,31 +70,55 @@ public final class Players {
     }
     
     /**
-     * Generamos el id del jugador siempre y cuando
-     * al comprobar que el nombre del jugador existe
-     * en caso contrario, si nos devuelve "", continuaremos
+     * Genero ids al azar hasta que pueda encontrar uno que no
+     * tenga ningun jugador, osea, que getPlayerName me devuelva ""
      */
     do
     {
         identificadorJugador = getRandomId();
        
-    }while(!" ".equalsIgnoreCase(getPlayerName(identificadorJugador)));
+    }while(! "".equalsIgnoreCase(getPlayerName(identificadorJugador)));
     
-    try (PreparedStatement preparedStatementInsertarJugador = connection.prepareStatement(consultarInsertarJugador))
+    try (final PreparedStatement preparedStatementInsertarJugador = connection.prepareStatement(consultarInsertarJugador))
     {
         preparedStatementInsertarJugador.setString(1, identificadorJugador);
         preparedStatementInsertarJugador.setString(2, name);
-        preparedStatementInsertarJugador.executeUpdate();
+        
+        /**
+         * El enunciado me pide que haga return true o false segun si se ha modificado
+         * la tabla o no , verifico las filas que han sido modificadas por el insert
+         * si sale mayor que cero entonces algo fue modificado, si no pues nada
+        */
+        final int filasAfectadas = preparedStatementInsertarJugador.executeUpdate();
+        return filasAfectadas>0;
     }
-      return true;
+    catch (final SQLException e) 
+    {
+        LOGGER.log(Level.SEVERE,"fallo al insertar jugador en la bbdd ",e);
+        throw e;
+    }
   }
 
   public List<String> getPlayers () throws SQLException {
     final List<String> players = new ArrayList<>();
 
     // TODO
-
-    return players;
+    final String consultarJugadoresSQL = "select PlayerName from Players";
+    try (final PreparedStatement preparedStatementJugadores = connection.prepareStatement(consultarJugadoresSQL))
+    {
+        final ResultSet resultadoBusquedaJugadores = preparedStatementJugadores.executeQuery();
+        while (resultadoBusquedaJugadores.next())
+        {
+            final String nombreDelJugador;
+            nombreDelJugador = resultadoBusquedaJugadores.getString("PlayerName");
+            players.add(nombreDelJugador);
+        }
+        return players;
+    }catch (final SQLException e) 
+    {
+        LOGGER.log(Level.SEVERE, "Fallo al obtener la lista de todos los jugadores", e);
+        throw e;
+    }
   }
 
   String getPlayerId (final String name) throws SQLException 
@@ -123,7 +144,8 @@ public final class Players {
                 return "";
             }
         }
-    }catch (final SQLException e)
+    }
+    catch (final SQLException e)
     {
         LOGGER.log(Level.SEVERE, "consulta mal ejecutada: busqueda id del nombre del jugador ", e);
         throw e;
@@ -152,7 +174,8 @@ public final class Players {
                 return "";
             }
         }
-    }catch (final SQLException e)
+    }
+    catch (final SQLException e)
     {
         LOGGER.log(Level.SEVERE, "consulta mal ejecutada: busqueda del nombre del jugador ", e);
         throw e;
