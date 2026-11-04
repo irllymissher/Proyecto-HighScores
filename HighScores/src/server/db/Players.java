@@ -97,7 +97,7 @@ public final class Players {
     }
     catch (final SQLException e) 
     {
-        LOGGER.log(Level.SEVERE,"fallo al insertar jugador en la bbdd ",e);
+        LOGGER.log(Level.WARNING,"fallo al insertar jugador en la bbdd ",e);
         throw e;
     }
   }
@@ -120,7 +120,7 @@ public final class Players {
     }
     catch (final SQLException e) 
     {
-        LOGGER.log(Level.SEVERE, "Fallo al obtener la lista de todos los jugadores", e);
+        LOGGER.log(Level.WARNING, "Fallo al obtener la lista de todos los jugadores", e);
         throw e;
     }
   }
@@ -151,7 +151,7 @@ public final class Players {
     }
     catch (final SQLException e)
     {
-        LOGGER.log(Level.SEVERE, "consulta mal ejecutada: busqueda id del nombre del jugador ", e);
+        LOGGER.log(Level.WARNING, "consulta mal ejecutada: busqueda id del nombre del jugador ", e);
         throw e;
     }
   }
@@ -181,7 +181,7 @@ public final class Players {
     }
     catch (final SQLException e)
     {
-        LOGGER.log(Level.SEVERE, "consulta mal ejecutada: busqueda del nombre del jugador ", e);
+        LOGGER.log(Level.WARNING, "consulta mal ejecutada: busqueda del nombre del jugador ", e);
         throw e;
     }
   }
