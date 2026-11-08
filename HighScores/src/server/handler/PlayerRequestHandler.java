@@ -59,6 +59,10 @@ public final class PlayerRequestHandler implements HttpHandler {
     // TODO
     
     /**
+     * README: 
+     *  > Este metodo sale directamente de `SortingHandler` tenemos 
+     *  > metodo similar: alojar, ordenar, respuesta....
+     *    
      * 1) Lectura
      * 2) Procesar
      * 3) Respuesta
@@ -67,26 +71,59 @@ public final class PlayerRequestHandler implements HttpHandler {
     final Players p = new Players();
     final boolean resultadoDeAlta;
     
+    /**
+     * README:
+     * > "Se emplea un objeto de clase Scanner pra ller las lineas" sacado
+     * > directamente de la practica p.4
+     * > El charset explicito sale del Tema 2b, p.7 en el cual comenta que
+     * > debemos de establecer el charset en el que opera cada stream.
+     */
     try (Scanner bodyScanner= 
             new Scanner(
                     exchange.getRequestBody(), 
                     StandardCharsets.UTF_8.name())) 
     {
+        
+        /**
+         * README:
+         * > Normalizamos cada linea a la forma NFKC 
+         * > Usamos Tema 2b, p.6 donde se extiende consenso en emplear NFKC
+         */
         final String lineaJson = bodyScanner.nextLine();
         final String lineaNormalizada = Normalizer.normalize(
                 lineaJson, 
                 Normalizer.Form.NFKC);
 
+        /**
+         * REVISAR ESTE CODIGO PORQUE NO ESTOY SEGURO DE SI
+         * ES NECESARIO
+         */
         try (Scanner lineScanner= 
                 new Scanner(lineaNormalizada)) 
         {
+            
+            /**
+             * README: 
+             * > "next(String pattern) para obtener cada token"
+             * > "el token playername se lee con la invocación scanner.next("playername")" 
+             */
             lineScanner.next("playername");
             lineScanner.next(":");
             final String nombre;
             nombre=lineScanner.next();
 
+            /**
+             * README:
+             * > Me apoyo en el Tema 2b, p.2: "rechazar datos inválidos… no se debe intentar arreglar"
+             * > Tambien del enuncadio de la practica: "expresiones regulares que se refieran a la entrada completa"
+             */
             if (lineScanner.hasNext()) 
             {
+                /**
+                 * README:
+                 * > "Es obligatorio capturar la excepción NoSuchElementException"
+                 * > "peticiones que no pasen los filtros… HTTP_NO_CONTENT pero sin cuerpo"
+                 */
                 throw new NoSuchElementException("Residuo");
             }
             resultadoDeAlta = p.newPlayer(nombre);
@@ -98,6 +135,12 @@ public final class PlayerRequestHandler implements HttpHandler {
         responderSinContenido(exchange);
         return;
     }
+    
+    /**
+     * README: 
+     * > «relanzadas desde el nivel interior» se registran en el handler; 
+     * > errorinterno → 204 sin cuerpo
+     */
     catch(SQLException e) 
     {
         logging(Level.SEVERE, e, exchange, "Fallo en bbdd al dar de alta al juegador nuevo");
@@ -107,11 +150,26 @@ public final class PlayerRequestHandler implements HttpHandler {
     
     try 
     {
+        /**
+         * README: 
+         * > Cabecera con longitud libre sale directamente de `SortingHandler`:
+         * > " el valor 0 indica que se envía una cantidad de octetos no determinada"
+         * > Tambien indico que uso parte de la Teoria: Anexo 1, p.14, pasos 5-6
+         */ 
         exchange.sendResponseHeaders(HTTP_OK, 0);
+        
+        /**
+         * README: 
+         * > Stream de respuesta sacado de `SortingHandler` misma pareja de recursos
+         */
         try (OutputStream os= 
                 exchange.getResponseBody();
              DataOutputStream dos = new DataOutputStream(os)) 
         {
+            /**
+             * README:
+             * > el servidor debe escribir la respuesta empleando el método writeBoolean()
+             */
             dos.writeBoolean(resultadoDeAlta);
         }
     } 
@@ -134,6 +192,10 @@ public final class PlayerRequestHandler implements HttpHandler {
    * directamente porque su handler declara throws IOExcepcion, pero los metodos
    * de este proyecot no lo hacen
    * @param exchange 
+   * 
+   * README:
+   * > Propuesto para no repetir try carch constantemente, no lo pide el enunciado
+   * > El resto de elementos parten del Anexo 1, p.13 y de `SortingHandler`
    */
   private void responderSinContenido(final HttpExchange exchange) 
   {
@@ -157,14 +219,31 @@ public final class PlayerRequestHandler implements HttpHandler {
     try 
     {
         final List<String> listaDeJugadores= p.getPlayers();
+        
+        /**
+         * README:
+         * > Sacado del mismo `SortingHandler`
+         */
         exchange.sendResponseHeaders(HTTP_OK,0);
         try( 
                 final OutputStream os=exchange.getResponseBody();
+                
+                /**
+                 * README:
+                 * > "Cuando el cuerpo de respuesta … esté formado por más de una línea
+                 * > esa respuesta se debe escribir mediante un objeto de clase OutputStreamWriter"
+                 * > Me apoyo del Team 2b, p.6-7, aunque el profe @MAZ utiliza: `Dfile.encoding=UTF-8`
+                 */
                 final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8)
             )
         {
             for (final String j : listaDeJugadores) 
             {
+                /**
+                 * README:
+                 * > "un carácter end-line separa cada línea"
+                 * > Saco el salto de linea de NewScore que escribe el campo y luego salto de linea
+                 */
                 w.write(j);
                 w.write("\n");
             }
