@@ -54,8 +54,9 @@ public final class Scores {
     try( final PreparedStatement preparedStatementInsertarPuntuaje
             = connection.prepareStatement(consulta))
     {
-        preparedStatementInsertarPuntuaje.setString(2, idJuego);
+        
         preparedStatementInsertarPuntuaje.setString(1, idJugador);
+        preparedStatementInsertarPuntuaje.setString(2, idJuego);
         
         preparedStatementInsertarPuntuaje.setInt(3, score);
         
@@ -78,9 +79,16 @@ public final class Scores {
                                  throws SQLException {
     
     final Map<String, Integer> scores = new LinkedHashMap<>();
+    final String idJuego = g.getGameId(gamename);
     
-    // TODO
+    if( gamename == null)
+    {
+        return scores;
+    }
     
+    final String consulta = "select p.PlayerName, MAX(s.Score) as MaxScore from Scores s " +
+                            "join Players p on s.PlayerId = p.PlayerId " +
+                            "where s.GameId = ? group by p.PlayerName order by MaxScore desc";
   }
   
   public Map<String, Integer> getPlayerScores (final String playername)
