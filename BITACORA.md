@@ -43,3 +43,12 @@
   aunque em haya salido de manera mas natural
   - la validacion del nombre va en el handler y no en players
   - Java no te detecta los nombres de las tablas mal escritos 
+
+# 2026-11-08 (parte 1)
+- Hecho:
+	- Realizado los 3 metodfos de scores, efectivamente server.db finalizado 
+- Fallos:
+	- No les habia dado a Players y Games valor en el constructor
+	- No concatné de manera correcta los sql
+- Fuentes: enunciado
+- Dudas/Decisiones

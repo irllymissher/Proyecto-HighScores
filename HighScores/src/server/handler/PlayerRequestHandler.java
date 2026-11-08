@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
+import java.nio.charset.StandardCharsets;
 //
 import server.db.Players;
 //
@@ -33,7 +35,6 @@ public final class PlayerRequestHandler implements HttpHandler {
   public void handle (final HttpExchange exchange) throws IOException {
 
     final String requestMethodName = exchange.getRequestMethod();
-
     if ("PUT".compareTo(requestMethodName) == 0) {
       LOGGER.info("PUT recibido");
       // Solicitud de inserción de nuevo jugador
@@ -49,6 +50,7 @@ public final class PlayerRequestHandler implements HttpHandler {
 
   }
 
+  
   private void handlePutRequest (final HttpExchange exchange) {
 
     // TODO
@@ -59,6 +61,29 @@ public final class PlayerRequestHandler implements HttpHandler {
 
     // TODO
 
+  }
+  
+  /**
+   * Informacion buscada:
+   *    > https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
+   *    > https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html
+   *    > https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message
+   *    > https://docs.astral.sh/ruff/rules/logging-string-format/
+  */
+  private void logging (
+          final Level level, 
+          final Exception ex, 
+          final HttpExchange exchange, 
+          final String eventDescription) 
+  {
+      final String mensaje = String.format(
+              "%s - %s - %s", 
+              exchange.getRemoteAddress().toString(), 
+              exchange.getRequestMethod(), 
+              exchange.getRequestURI().getPath(),   /* scores atiende dos get */
+              eventDescription);
+      
+      LOGGER.log(level, mensaje, ex);
   }
 
 }
