@@ -154,5 +154,11 @@ public final class Scores {
             }
         }
     }
-  
+    catch (final SQLException e) 
+    {
+        LOGGER.log(Level.WARNING, "Fallo al listar las puntuaciones del jugador", e);
+        throw e;
+    }
+    return scores;
+  }
 }
