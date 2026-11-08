@@ -21,6 +21,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
+import java.util.NoSuchElementException;
+
 //
 import server.db.Players;
 //
@@ -51,15 +54,136 @@ public final class PlayerRequestHandler implements HttpHandler {
   }
 
   
-  private void handlePutRequest (final HttpExchange exchange) {
+  private void handlePutRequest (final HttpExchange exchange) throws SQLException {
 
     // TODO
+    
+    /**
+     * 1) Lectura
+     * 2) Procesar
+     * 3) Respuesta
+     */
+    
+    final Players p = new Players();
+    final boolean resultadoDeAlta;
+    
+    try (Scanner bodyScanner= 
+            new Scanner(
+                    exchange.getRequestBody(), 
+                    StandardCharsets.UTF_8.name())) 
+    {
+        final String lineaJson = bodyScanner.nextLine();
+        final String lineaNormalizada = Normalizer.normalize(
+                lineaJson, 
+                Normalizer.Form.NFKC);
 
+        try (Scanner lineScanner= 
+                new Scanner(lineaNormalizada)) 
+        {
+            lineScanner.next("playername");
+            lineScanner.next(":");
+            final String nombre;
+            nombre=lineScanner.next();
+
+            if (lineScanner.hasNext()) 
+            {
+                throw new NoSuchElementException("Residuo");
+            }
+            resultadoDeAlta = p.newPlayer(nombre);
+        }
+    } 
+    catch(NoSuchElementException e) 
+    {
+        logging(Level.WARNING, e, exchange, "Parametros incorrectos en PUT");
+        responderSinContenido(exchange);
+        return;
+    }
+    catch(SQLException e) 
+    {
+        logging(Level.SEVERE, e, exchange, "Fallo en bbdd al dar de alta al juegador nuevo");
+        responderSinContenido(exchange);
+        return;
+    }
+    
+    try 
+    {
+        exchange.sendResponseHeaders(HTTP_OK, 0);
+        try (OutputStream os= 
+                exchange.getResponseBody();
+             DataOutputStream dos = new DataOutputStream(os)) 
+        {
+            dos.writeBoolean(resultadoDeAlta);
+        }
+    } 
+    catch( IOException e )
+    {
+        logging(
+                Level.SEVERE, 
+                e, exchange, 
+                "Error de entrada/salida al escribir respuesta en PUT");
+    }
+  }
+  
+  /**
+   * El error 204 envia http no content y no content y esa llamada lanza IOException
+   * Los metodos que tenemos que realizar vienen sin throws
+   * Cada catch que responde el 204 necesita su propio bloque try-catch y para ahorrarnos
+   * el lio podemos crear este metodo 
+   * 
+   * PARA REVISAR: el profesor @MAZ en el netbeans de SortingHandler realiza el catch
+   * directamente porque su handler declara throws IOExcepcion, pero los metodos
+   * de este proyecot no lo hacen
+   * @param exchange 
+   */
+  private void responderSinContenido(final HttpExchange exchange) 
+  {
+    try 
+    {
+        exchange.sendResponseHeaders(HTTP_NO_CONTENT, NO_CONTENT);
+    } catch (IOException e) 
+    {
+        logging(
+                Level.SEVERE, 
+                e, exchange, 
+                "No se pudo enviar el codigo 204 al cliente");
+    }
   }
 
   private void handleGetRequest (final HttpExchange exchange) {
 
     // TODO
+    final Players p= new Players();
+    try 
+    {
+        final List<String> listaDeJugadores= p.getPlayers();
+        exchange.sendResponseHeaders(HTTP_OK,0);
+        try(final OutputStream os=exchange.getResponseBody();
+                final DataOutputStream dos = new DataOutputStream(os))
+        {
+            dos.writeInt(listaDeJugadores.size());
+            for (final String j : listaDeJugadores) 
+            {
+                dos.writeUTF(j);
+            }
+        }
+    } 
+    catch (SQLException ex) 
+    {
+          logging(
+                  Level.WARNING, 
+                  ex, 
+                  exchange, 
+                  "Fallo en bbdd al obtener el listado de jugadores");
+          responderSinContenido(exchange);
+    } 
+    catch( IOException ex )
+    {
+        Logger.getLogger(
+                PlayerRequestHandler.class.getName()).log(
+                        Level.SEVERE, 
+                        null, 
+                        ex);
+    }
 
   }
   
