@@ -12,6 +12,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.sql.PreparedStatement;
+
 //
 public final class Games {
 
@@ -38,35 +40,136 @@ public final class Games {
 
   }
 
-  public boolean newGame (final String name) throws SQLException {
+    public boolean newGame(final String name) throws SQLException 
+    {
+        final String juegoEnMayusc = name.toUpperCase();
+        final String consulta = "insert into Games (GameId, GameName) values (?, ?)";
+        // Si el juego ya está registrado, se devuelve false.
+        if (name==null)
+        {
+            return false;
+        }
+        // El identificador de un juego se pide al método getRandomId().
+        if (! getGameId ( name ).isEmpty()) 
+        {
+            return false;
+        }
+        // Es necesario un bucle que vaya generando identificadores hasta
+        // dar con uno que todavía no haya sido empleado.
+        String id2 = getRandomId();
+        while( !getGameName( id2 ).isEmpty())
+        {
+            id2 = getRandomId();
+        }
+        
+        try( final PreparedStatement preparedStatementInsert
+                = connection.prepareStatement(consulta))
+        {
+            preparedStatementInsert.setString(1, id2);
+            
+            preparedStatementInsert.setString(2, juegoEnMayusc);
+            final int filasAfectadas = preparedStatementInsert.executeUpdate();
+            return filasAfectadas > 0;
+        }
+        
+        catch( final SQLException e)
+        {
+            LOGGER.log(Level.WARNING, "Fallo para registrar un juego nuevo", e);
+            throw e;
+        }
+    }
 
-    // Si el juego ya está registrado, se devuelve false.
-
-    // El identificador de un juego se pide al método getRandomId().
-    // Es necesario un bucle que vaya generando identificadores hasta
-    // dar con uno que todavía no haya sido empleado.
-
-    return false;
-  }
-
-  public List<String> getGames () throws SQLException {
+  public List<String> getGames () throws SQLException 
+  {
     final List<String> games = new ArrayList<>();
-
     // TODO
-
+    final String consulta = "select GameName from Games";
+    try (final PreparedStatement preparedStatementJuegos = 
+            connection.prepareStatement(consulta)) 
+    {
+        
+      try (final ResultSet resultadoConsulta = preparedStatementJuegos.executeQuery()) {
+        while (resultadoConsulta.next()) 
+        {
+          games.add(resultadoConsulta.getString("GameName"));
+        }
+      }
+    }
+    catch (final SQLException e) 
+      {
+          LOGGER.log(Level.WARNING, "Fallo al listar los juegos", e);
+          throw e;
+      }
     return games;
   }
 
   String getGameId (final String name) throws SQLException {
-
-    // TODO
-
+    if (name == null) 
+    {
+        return "";
+    }
+    final String juegoEnMayusculas = name.toUpperCase();
+    final String consultaJuego = "select GameId from Games where GameName=?";
+    
+    try(final PreparedStatement preparedStatementJuegoEnMayusculas = 
+            connection.prepareStatement(consultaJuego))
+    {
+        
+        preparedStatementJuegoEnMayusculas.setString(1, juegoEnMayusculas);
+        try(final ResultSet resultadoConsulta = preparedStatementJuegoEnMayusculas.executeQuery())
+        {
+            if (resultadoConsulta.next())
+            {
+                return resultadoConsulta.getString("GameId");
+             
+                        
+            }
+            else
+            {
+                return "";
+            }
+        }
+    }
+    catch (final SQLException e)
+        {
+            LOGGER.log(Level.WARNING, "Fallo al buscar el id del juego", e);
+            throw e;
+        }
+    
   }
 
-  String getGameName (final String gameId) throws SQLException {
-
-    // TODO
-
+  String getGameName (final String gameId) throws SQLException
+  {
+      if (gameId == null) 
+    {
+        return "";
+    }
+    final String consultaNombreJuego = "select GameName from Games where GameId=?";
+    
+    try(final PreparedStatement preparedStatementNombreJuego = 
+            connection.prepareStatement(consultaNombreJuego))
+    {
+        
+        preparedStatementNombreJuego.setString(1, gameId);
+        try(final ResultSet resultadoConsulta = preparedStatementNombreJuego.executeQuery())
+        {
+            if (resultadoConsulta.next())
+            {
+                return resultadoConsulta.getString("GameName");
+             
+                        
+            }
+            else
+            {
+                return "";
+            }
+        }
+    }
+    catch (final SQLException e)
+        {
+            LOGGER.log(Level.WARNING, "Fallo al buscar el nombre del juego", e);
+            throw e;
+        }
   }
 
 }
