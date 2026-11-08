@@ -122,10 +122,37 @@ public final class Scores {
   public Map<String, Integer> getPlayerScores (final String playername)
                                  throws SQLException {
     
-    final Map<String, Integer> scores = new LinkedHashMap<>();   
+    final Map<String, Integer> scores = new LinkedHashMap<>();
+    final String idJugador = p.getPlayerId(playername);
     
     // TODO
+    if ( playername == null )
+    {
+        return scores;
+    }
+    if ( idJugador.isEmpty() )
+    {
+        return scores;
+    }
+    final String consulta = 
+            "select g.GameName, MAX(s.Score) as MaxScore from Scores s " + 
+            "join Games g on s.GameId = g.GameId " +
+            "where s.PlayerId = ? group by g.GameName order by MaxScore desc";
     
-  }  
+    try (final PreparedStatement preparedStatementPuntuacioneJugadores = 
+            connection.prepareStatement(consulta)) 
+    {
+        preparedStatementPuntuacioneJugadores.setString(1, idJugador);
+        
+        try (final ResultSet resultadoConsulta= 
+                preparedStatementPuntuacioneJugadores.executeQuery()) {
+            while ( resultadoConsulta.next() ) 
+            {
+                scores.put(
+                        resultadoConsulta.getString("GameName"), 
+                        resultadoConsulta.getInt("MaxScore"));
+            }
+        }
+    }
   
 }
