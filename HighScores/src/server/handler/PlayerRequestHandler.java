@@ -125,7 +125,7 @@ public final class PlayerRequestHandler implements HttpHandler {
   }
   
   /**
-   * El error 204 envia http no content y no content y esa llamada lanza IOException
+   * El 204 envia http no content y no content y esa llamada lanza IOException
    * Los metodos que tenemos que realizar vienen sin throws
    * Cada catch que responde el 204 necesita su propio bloque try-catch y para ahorrarnos
    * el lio podemos crear este metodo 
@@ -143,7 +143,7 @@ public final class PlayerRequestHandler implements HttpHandler {
     } catch (IOException e) 
     {
         logging(
-                Level.SEVERE, 
+                Level.WARNING, 
                 e, exchange, 
                 "No se pudo enviar el codigo 204 al cliente");
     }
@@ -180,7 +180,7 @@ public final class PlayerRequestHandler implements HttpHandler {
     {
         Logger.getLogger(
                 PlayerRequestHandler.class.getName()).log(
-                        Level.SEVERE, 
+                        Level.WARNING, 
                         null, 
                         ex);
     }
@@ -201,7 +201,7 @@ public final class PlayerRequestHandler implements HttpHandler {
           final String eventDescription) 
   {
       final String mensaje = String.format(
-              "%s - %s - %s", 
+              "%s - %s - %s - %s", 
               exchange.getRemoteAddress().toString(), 
               exchange.getRequestMethod(), 
               exchange.getRequestURI().getPath(),   /* scores atiende dos get */
