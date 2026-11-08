@@ -54,7 +54,7 @@ public final class PlayerRequestHandler implements HttpHandler {
   }
 
   
-  private void handlePutRequest (final HttpExchange exchange) throws SQLException {
+  private void handlePutRequest (final HttpExchange exchange) {
 
     // TODO
     
@@ -149,7 +149,8 @@ public final class PlayerRequestHandler implements HttpHandler {
     }
   }
 
-  private void handleGetRequest (final HttpExchange exchange) {
+  private void handleGetRequest (final HttpExchange exchange) 
+  {
 
     // TODO
     final Players p= new Players();
@@ -157,17 +158,19 @@ public final class PlayerRequestHandler implements HttpHandler {
     {
         final List<String> listaDeJugadores= p.getPlayers();
         exchange.sendResponseHeaders(HTTP_OK,0);
-        try(final OutputStream os=exchange.getResponseBody();
-                final DataOutputStream dos = new DataOutputStream(os))
+        try( 
+                final OutputStream os=exchange.getResponseBody();
+                final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8)
+            )
         {
-            dos.writeInt(listaDeJugadores.size());
             for (final String j : listaDeJugadores) 
             {
-                dos.writeUTF(j);
+                w.write(j);
+                w.write("\n");
             }
         }
     } 
-    catch (SQLException ex) 
+    catch ( final SQLException ex ) 
     {
           logging(
                   Level.WARNING, 
@@ -176,15 +179,14 @@ public final class PlayerRequestHandler implements HttpHandler {
                   "Fallo en bbdd al obtener el listado de jugadores");
           responderSinContenido(exchange);
     } 
-    catch( IOException ex )
+    catch( final IOException ex )
     {
-        Logger.getLogger(
-                PlayerRequestHandler.class.getName()).log(
-                        Level.WARNING, 
-                        null, 
-                        ex);
+        logging(
+                Level.SEVERE, 
+                ex, 
+                exchange, 
+                "Error de entrada/salida al escribir el listado de jugadores en GET");
     }
-
   }
   
   /**
