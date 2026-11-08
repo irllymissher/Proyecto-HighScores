@@ -40,7 +40,7 @@ public final class Scores {
     final String idJuego = g.getGameId(gamename);   /* Ya convertido en Mayusculas */
 
     // Se inserta puntuación.
-    final String consulta =" insert into Scores (PlayerId, GameId, Score) values(?,?, ?)";
+    final String insertarConsulta =" insert into Scores (PlayerId, GameId, Score) values(?,?, ?)";
     if (playername == null || gamename == null)
     {
         return false;
@@ -52,7 +52,7 @@ public final class Scores {
     }
     
     try( final PreparedStatement preparedStatementInsertarPuntuaje
-            = connection.prepareStatement(consulta))
+            = connection.prepareStatement(insertarConsulta))
     {
         
         preparedStatementInsertarPuntuaje.setString(1, idJugador);
@@ -86,9 +86,37 @@ public final class Scores {
         return scores;
     }
     
-    final String consulta = "select p.PlayerName, MAX(s.Score) as MaxScore from Scores s " +
-                            "join Players p on s.PlayerId = p.PlayerId " +
-                            "where s.GameId = ? group by p.PlayerName order by MaxScore desc";
+    /* Se me facilita leer la consulta asi */
+    final String consulta = 
+            "select p.PlayerName, MAX(s.Score) as MaxScore from Scores s " +
+            "join Players p on s.PlayerId = p.PlayerId " +
+            "where s.GameId = ? group by p.PlayerName order by MaxScore desc";
+    
+    try (final PreparedStatement preparedStatementPuntuacionesDeJuego = 
+            connection.prepareStatement(consulta)) 
+    {
+        preparedStatementPuntuacionesDeJuego.setString(1, idJuego);
+        
+        try ( final ResultSet resultadoConsulta=
+                preparedStatementPuntuacionesDeJuego.executeQuery()) 
+        {
+            while ( resultadoConsulta.next() ) 
+            {
+                scores.put
+                (
+                        resultadoConsulta.getString("PlayerName"), 
+                        resultadoConsulta.getInt("MaxScore")
+                );
+            }
+        }
+    }
+    catch (final SQLException e) 
+    {
+        LOGGER.log(Level.WARNING, "Fallo en puntuaciones", e);
+        throw e;
+    }
+    return scores;
+    
   }
   
   public Map<String, Integer> getPlayerScores (final String playername)
