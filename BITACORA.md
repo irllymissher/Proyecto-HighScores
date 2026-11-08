@@ -43,8 +43,9 @@
   aunque em haya salido de manera mas natural
   - la validacion del nombre va en el handler y no en players
   - Java no te detecta los nombres de las tablas mal escritos 
+## 2026-11-05
 
-# 2026-11-08 (parte 1)
+## 2026-11-08 (parte 1)
 - Hecho:
 	- Realizado los 3 metodfos de scores, efectivamente server.db finalizado 
 - Fallos:
@@ -52,3 +53,38 @@
 	- No concatné de manera correcta los sql
 - Fuentes: enunciado
 - Dudas/Decisiones
+	- Uso join para evitarme una segunda consulta
+	- Sacamos el id primero
+	- La puntuacion positiva se valida en el handler, no en Scores
+	- La firma usa INT y el enunciado dice LONG
+
+## 2026-11-08 (parte 2)
+- Hecho:
+  - Realizado PlayerRequestHandler: logging, responderSinContenido, handlePutRequest
+  y handleGetRequest
+  - Comentado de donde sale cada parte (enunciado, SortingHandler, teoria)
+ - Fallos:
+  - en logging puse 3 %s para 4 datos y String.format se comia la descripcion sin avisar
+  - no guardaba el resultado de newPlayer y no escribia nada con writeBoolean
+  - puse throws SQLException en handlePutRequest y rompia el handle del profe
+  - el if (hasNextLine()) dejaba la variable sin valor; nextLine() ya lanza la excepcion
+  - intente atrapar IOException leyendo con Scanner, pero Scanner nunca la lanza
+  - el GET lo hice en binario (writeInt/writeUTF, como SortingHandler) y el cliente
+  lee lineas de texto, tiene que ir con OutputStreamWriter
+  - parentesis y llave de mas
+ - Fuentes: 
+	- enunciado p.2, p.4, p.5 y p.7; SortingHandler; Anexo 1 p.13-14;
+	Tema 2b p.2, p.4, p.6 y p.7; documentacion de HttpExchange (Oracle)
+- Dudas/Decisiones:
+  - no uso StreamNormalizer porque lo probe y pega las lineas y se queda colgado;
+  leo con Scanner, normalizo cada linea a NFKC y saco los tokens con un segundo
+  Scanner (preguntar al profe si se puede corregir el suyo)
+  - logging lo pide la p.7 aunque no venga en el esqueleto; registra direccion,
+  metodo, ruta y descripcion, pero no el nombre que manda el usuario
+  - responderSinContenido para no repetir el try-catch del 204 (sendResponseHeaders
+  lanza IOException y los metodos no tienen throws)
+  - separo leer+procesar de responder: despues de enviar el 200 ya no puedo mandar
+  el 204, en ese catch solo registro
+  - rechazo lo que sobre despues del nombre (residuo)
+  - Players se crea dentro del metodo porque RequestComponent arranca antes que la BD
+  
