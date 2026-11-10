@@ -208,10 +208,10 @@ public final class ScoreRequestHandler implements HttpHandler {
         {
             for ( final Map.Entry <String, Integer>entrada : listaPuntuaciones.entrySet())
             {
-                w.write("gamename: ");
+                w.write("gamename : ");
                 w.write(entrada.getKey());
                 w.write("\n");
-                w.write("score: ");
+                w.write("score : ");
                 w.write(String.valueOf(entrada.getValue()));
                 w.write("\n");
             }
