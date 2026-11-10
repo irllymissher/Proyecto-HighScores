@@ -188,7 +188,7 @@ public final class GameRequestHandler implements HttpHandler {
               "%s - %s - %s - %s", 
               exchange.getRemoteAddress().toString(), 
               exchange.getRequestMethod(), 
-              exchange.getRequestURI().getPath(),   /* scores atiende dos get */
+              exchange.getRequestURI().getPath(),   
               eventDescription);
       
       LOGGER.log(
