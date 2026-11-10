@@ -56,8 +56,21 @@ public final class ScoreRequestHandler implements HttpHandler {
     }
 
   }
-
-  private void handlePostRequest(final HttpExchange exchange) {
+  
+  
+  /**
+   * Se realiza el ALTA de la puntuacion.
+   * 
+   * Este metodo lee el jugador, los datos del jugador y la puntuacion que se ha recibido.
+   * Cada linea leida se normaliza y se valida que los parametros sean los esperados, si 
+   * todo es correcto entonces se registra en la bbdd respondiendo con un 200, y con un
+   * booleano indicando que se dio de alta, si falla entonces devuelve false
+   * 
+   * Si el formato no es esperado o falla por alguna razon entonces lanzaremos un error
+   * y se respondera con un 204 sin cuerpo
+   */
+  private void handlePostRequest (final HttpExchange exchange)
+  {
     final Scores s;
     final boolean resultadoDeAlta;
     final String nombreJugador;
@@ -67,87 +80,114 @@ public final class ScoreRequestHandler implements HttpHandler {
     s = new Scores();
 
     try ( Scanner bodyScanner = new Scanner(
-        exchange.getRequestBody(),
-        StandardCharsets.UTF_8.name())) {
+            exchange.getRequestBody(),
+            StandardCharsets.UTF_8.name()))
+    {
       final String lineaCuerpo, lineaNormalizada;
       final String lineaJuego, lineaNormalzadaJuego;
       final String lineaPuntuacion, lineaNormalizadaPuntuacion;
 
       lineaCuerpo = bodyScanner.nextLine();
       lineaNormalizada = Normalizer.normalize(
-          lineaCuerpo,
-          Normalizer.Form.NFKC);
+              lineaCuerpo,
+              Normalizer.Form.NFKC);
       /* JUGADOR */
-      try ( Scanner linScanner = new Scanner(lineaNormalizada)) {
+      try ( Scanner linScanner = new Scanner(lineaNormalizada))
+      {
         linScanner.next("playername");
         linScanner.next(":");
         nombreJugador = linScanner.next();
-        if (linScanner.hasNext()) {
+        if (linScanner.hasNext())
+        {
           throw new NoSuchElementException("Residuo en jugador");
         }
       }
 
       lineaJuego = bodyScanner.nextLine();
       lineaNormalzadaJuego = Normalizer.normalize(
-          lineaJuego,
-          Normalizer.Form.NFKC);
+              lineaJuego,
+              Normalizer.Form.NFKC);
       /* JUEGO */
-      try ( Scanner linScanner = new Scanner(lineaNormalzadaJuego)) {
+      try ( Scanner linScanner = new Scanner(lineaNormalzadaJuego))
+      {
         linScanner.next("gamename");
         linScanner.next(":");
         nombreJuego = linScanner.nextLine().trim();
-        if (nombreJuego.isEmpty()) {
+        if (nombreJuego.isEmpty())
+        {
           throw new NoSuchElementException("Nombre de juego vacio");
         }
       }
 
       lineaPuntuacion = bodyScanner.nextLine();
       lineaNormalizadaPuntuacion = Normalizer.normalize(
-          lineaPuntuacion,
-          Normalizer.Form.NFKC);
+              lineaPuntuacion,
+              Normalizer.Form.NFKC);
       /* PUNTUACION*/
-      try ( Scanner linScanner = new Scanner(lineaNormalizadaPuntuacion)) {
+      try ( Scanner linScanner = new Scanner(lineaNormalizadaPuntuacion))
+      {
         linScanner.next("score");
         linScanner.next(":");
-        puntuacionRecibida = linScanner.nextInt();
-        if (linScanner.hasNext()) {
+        puntuacionRecibida = Integer.parseInt(linScanner.next());
+        if (linScanner.hasNext())
+        {
           throw new NoSuchElementException("Residuo en scores");
         }
       }
       resultadoDeAlta = s.newScore(nombreJugador, nombreJuego, puntuacionRecibida);
-    } catch (final NoSuchElementException e) {
+    }
+    catch (final NoSuchElementException e)
+    {
       logging(
-          Level.WARNING,
-          e,
-          exchange,
-          "param incorrectos en de puntuaciones");
-      responderSinContenido(exchange);
-      return;
-    } catch (final SQLException e) {
-      logging(
-          Level.WARNING,
-          e,
-          exchange,
-          "fallo en bbdd al dar de alta la puntuacion");
+              Level.WARNING,
+              e,
+              exchange,
+              "param incorrectos en de puntuaciones");
       responderSinContenido(exchange);
       return;
     }
-    try {
+    catch (final NumberFormatException e)
+    {
+      logging(
+              Level.WARNING,
+              e,
+              exchange,
+              "Puntuacion recibida no valida");
+      responderSinContenido(exchange);
+      return;
+    }
+    catch (final SQLException e)
+    {
+      logging(
+              Level.WARNING,
+              e,
+              exchange,
+              "fallo en bbdd al dar de alta la puntuacion");
+      responderSinContenido(exchange);
+      return;
+    }
+    try
+    {
       exchange.sendResponseHeaders(HTTP_OK, 0);
-      try ( OutputStream os = exchange.getResponseBody();  DataOutputStream dos = new DataOutputStream(os)) {
+      try ( OutputStream os = exchange.getResponseBody();  
+              DataOutputStream dos = new DataOutputStream(os))
+      {
         dos.writeBoolean(resultadoDeAlta);
       }
-    } catch (final IOException e) {
+    }
+    catch (final IOException e)
+    {
       logging(
-          Level.WARNING,
-          e,
-          exchange,
-          "Error de i/o al escribir respuesta en POST");
+              Level.WARNING,
+              e,
+              exchange,
+              "Error de i/o al escribir respuesta en POST");
     }
 
   }
 
-  private void handleGetRequest(final HttpExchange httpExchange) {
+  private void handleGetRequest (final HttpExchange httpExchange)
+  {
 
     final URI uri = httpExchange.getRequestURI();
     final String queryGroup = uri.getQuery();
@@ -155,39 +195,62 @@ public final class ScoreRequestHandler implements HttpHandler {
 
     LOGGER.info(queryGroup);
 
-    try {
-      if ("playername".compareTo(parts[0]) == 0) {
+    try
+    {
+      if ("playername".compareTo(parts[0]) == 0)
+      {
         getPlayerScores(httpExchange, parts[1]);
-      } else if ("gamename".compareTo(parts[0]) == 0) {
+      }
+      else if ("gamename".compareTo(parts[0]) == 0)
+      {
         getGameScores(httpExchange, parts[1]);
-      } else {
+      }
+      else
+      {
         httpExchange.sendResponseHeaders(HTTP_BAD_REQUEST, NO_CONTENT);
       }
-    } catch (final IOException ex) {
+    }
+    catch (final IOException ex)
+    {
       LOGGER.log(Level.WARNING, "problema de I/O en respuesta", ex);
     }
 
   }
 
-  private void getPlayerScores(final HttpExchange exchange,
-      final String playername) {
+  /**
+   * Obtiene puntuaciones de un jugador.
+   * 
+   * Normaliza el nombre que se recibe y le solicita a la bbdd todas las 
+   * puntuaciones existentes.
+   * 
+   * Le devuelve al cliente el nombre de cada juego junto con la puntuacion
+   * que ha obtenido, cada dato es escrito en diferentes lineas
+   * 
+   * Si falla en cualquier caso se registra el error
+   */
+  private void getPlayerScores (final HttpExchange exchange,
+                                final String playername)
+  {
 
     final Scores s = new Scores();
 
-    try {
+    try
+    {
       final String nombreNormalizado;
       final Map< String, Integer> listaPuntuaciones;
 
       nombreNormalizado = Normalizer.normalize(
-          playername,
-          Normalizer.Form.NFKC);
+              playername,
+              Normalizer.Form.NFKC);
 
       listaPuntuaciones = s.getPlayerScores(nombreNormalizado);
 
       exchange.sendResponseHeaders(HTTP_OK, 0);
 
-      try (final OutputStream os = exchange.getResponseBody(); final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
-        for (final Map.Entry<String, Integer> entrada : listaPuntuaciones.entrySet()) {
+      try (final OutputStream os = exchange.getResponseBody(); final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8))
+      {
+        for (final Map.Entry<String, Integer> entrada : listaPuntuaciones.entrySet())
+        {
           w.write("gamename : ");
           w.write(entrada.getKey());
           w.write("\n");
@@ -197,41 +260,58 @@ public final class ScoreRequestHandler implements HttpHandler {
         }
 
       }
-    } catch (final IOException ex) {
+    }
+    catch (final IOException ex)
+    {
       logging(
-          Level.WARNING,
-          ex,
-          exchange,
-          "Error de i/o al escribir las puntuaciones del jugador ");
-    } catch (final SQLException ex) {
+              Level.WARNING,
+              ex,
+              exchange,
+              "Error de i/o al escribir las puntuaciones del jugador ");
+    }
+    catch (final SQLException ex)
+    {
       logging(
-          Level.WARNING,
-          ex,
-          exchange,
-          "Fallo en bbdd para obtener puntuaciones");
+              Level.WARNING,
+              ex,
+              exchange,
+              "Fallo en bbdd para obtener puntuaciones");
       responderSinContenido(exchange);
     }
 
   }
 
-  private void getGameScores(final HttpExchange exchange,
-      final String gamename) {
+  /**
+   * Obtiene las puntuaciones de un juego.
+   * 
+   * Normaliza el nombre que se recibe y le solicita a la bbdd todas las 
+   * puntuaciones asociadas al juego
+   * 
+   * Le devuelve al cliente el nombre de cada jugador junto con la puntuacion
+   * que ha obtenido, cada dato es escrito en diferentes lineas
+   */
+  private void getGameScores (final HttpExchange exchange,
+                              final String gamename)
+  {
     final Scores s = new Scores();
 
-    try {
+    try
+    {
       final String nombreNormalizado;
       final Map< String, Integer> listaPuntuaciones;
 
       nombreNormalizado = Normalizer.normalize(
-          gamename,
-          Normalizer.Form.NFKC);
+              gamename,
+              Normalizer.Form.NFKC);
 
       listaPuntuaciones = s.getGameScores(nombreNormalizado);
 
       exchange.sendResponseHeaders(HTTP_OK, 0);
 
-      try (final OutputStream os = exchange.getResponseBody(); final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
-        for (final Map.Entry<String, Integer> entrada : listaPuntuaciones.entrySet()) {
+      try (final OutputStream os = exchange.getResponseBody(); final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8))
+      {
+        for (final Map.Entry<String, Integer> entrada : listaPuntuaciones.entrySet())
+        {
           w.write("playername : ");
           w.write(entrada.getKey());
           w.write("\n");
@@ -241,46 +321,78 @@ public final class ScoreRequestHandler implements HttpHandler {
         }
 
       }
-    } catch (final IOException ex) {
+    }
+    catch (final IOException ex)
+    {
       logging(
-          Level.WARNING,
-          ex,
-          exchange,
-          "Error de i/o al escribir las puntuaciones del juego ");
-    } catch (final SQLException ex) {
+              Level.WARNING,
+              ex,
+              exchange,
+              "Error de i/o al escribir las puntuaciones del juego ");
+    }
+    catch (final SQLException ex)
+    {
       logging(
-          Level.WARNING,
-          ex,
-          exchange,
-          "Fallo en bbdd para obtener puntuaciones");
+              Level.WARNING,
+              ex,
+              exchange,
+              "Fallo en bbdd para obtener puntuaciones");
       responderSinContenido(exchange);
     }
 
   }
 
-  private void logging(
-      final Level level,
-      final Exception ex,
-      final HttpExchange exchange,
-      final String eventDescription) {
+  /**
+   * Apunta en el registro log lo que ha pasado y cual fue la peticion 
+   * - quien la manda 
+   * - con que metodo fue mandada 
+   * - a que ruta
+   *
+   * Fuente consultada interna:
+   *  - Enunciado:
+   *    p.7 (la firma viene de ahí, y el registro de excepciones va en este nivel)
+   * - Fuentes externas:
+   *  https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
+   *  https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html
+   *  https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message
+   *  https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
+   *  https://docs.oracle.com/en/java/javase/11/docs/api/java.logging/java/util/logging/Logger.html
+   */
+  private void logging (
+          final Level level,
+          final Exception ex,
+          final HttpExchange exchange,
+          final String eventDescription)
+  {
     final String mensaje = String.format(
-        "%s - %s - %s - %s",
-        exchange.getRemoteAddress().toString(),
-        exchange.getRequestMethod(),
-        exchange.getRequestURI().getPath(),
-        eventDescription);
+            "%s - %s - %s - %s",
+            exchange.getRemoteAddress().toString(),
+            exchange.getRequestMethod(),
+            exchange.getRequestURI().getPath(),
+            eventDescription);
 
     LOGGER.log(level, mensaje, ex);
   }
 
-  private void responderSinContenido(final HttpExchange exchange) {
-    try {
+  /**
+   * Este metodo manda un 204.
+   *
+   * He realizado este metodo porque sendRespondeHeader lanza un excepcion de IO
+   * y, para todo aquello que se repite, he simplifcado y creado este mtodo en
+   * vez de repetir el try-catch en cada sitio
+   */
+  private void responderSinContenido (final HttpExchange exchange)
+  {
+    try
+    {
       exchange.sendResponseHeaders(HTTP_NO_CONTENT, NO_CONTENT);
-    } catch (final IOException e) {
+    }
+    catch (final IOException e)
+    {
       logging(
-          Level.WARNING,
-          e, exchange,
-          "No se pudo enviar el codigo 204 al cliente");
+              Level.WARNING,
+              e, exchange,
+              "No se pudo enviar el codigo 204 al cliente");
     }
   }
 }

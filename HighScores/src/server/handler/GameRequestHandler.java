@@ -283,8 +283,10 @@ public final class GameRequestHandler implements HttpHandler {
   }
 
   /**
-   * Apunta en el registro log lo que ha pasado y cual fue la peticion - quien
-   * la manda - con que metodo fue mandada - a que ruta
+   * Apunta en el registro log lo que ha pasado y cual fue la peticion 
+   *  - quien la manda 
+   *  - con que metodo fue mandada 
+   *  - a que ruta
    *
    * Fuente consultada interna: 
    *  - Enunciado: 
