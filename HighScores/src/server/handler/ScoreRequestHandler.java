@@ -1,3 +1,32 @@
+/**
+ * Todos los cambios estan realizados estan en mi GitHub.
+ *
+ * Ahi se puede revisar el historial de decisiones y correciones que he ido
+ * tomando a lo largo de este proyecto para que el servicio pudiera funcionar
+ * como pide el enunciado de la practica
+ *
+ * He intentado ser coherente con la teoria vista en clase y con los ejemplos de
+ * NetBeans que MAZ explicó, siguiente las formas estandar de programar y usar
+ * los metodos que se usaron en los pertinentes lugares. En los comentarios de
+ * cada metodo explico el porqué de cada decisión.
+ *
+ *
+ * Fuentes internas:
+ * - Enunciado:
+ *    p.3 (POST /score y GET /score con query)
+ *    p.4 (lectura y validacion del cuerpo)
+ *    p.7 (registro y excepciones)
+ *    p.8 (códigos de respuesta)
+ * - Tema 2b:
+ *    p.2 (rechazar entradas invalidas)
+ *    p.6 (NFKC)
+ *    p.7 (charset explicito)
+ *  - SortingHandler (proyecto SortingService): estructura en 3 bloques
+ *
+ * Fuentes externas:
+ *   - HttpHandler: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
+ */
+
 package server.handler;
 
 /**
@@ -56,18 +85,52 @@ public final class ScoreRequestHandler implements HttpHandler {
     }
 
   }
-  
-  
+
+
   /**
    * Se realiza el ALTA de la puntuacion.
-   * 
-   * Este metodo lee el jugador, los datos del jugador y la puntuacion que se ha recibido.
-   * Cada linea leida se normaliza y se valida que los parametros sean los esperados, si 
+   *
+   * Este metodo lee el jugador, los datos del juego   y la puntuacion que se ha recibido.
+   * Cada linea leida se normaliza y se valida que los parametros sean los esperados, si
    * todo es correcto entonces se registra en la bbdd respondiendo con un 200, y con un
    * booleano indicando que se dio de alta, si falla entonces devuelve false
-   * 
+   *
    * Si el formato no es esperado o falla por alguna razon entonces lanzaremos un error
    * y se respondera con un 204 sin cuerpo
+   *
+   * Fuentes internas:
+   * - Enunciado:
+   *    p.2 (puntuación positiva; respuesta con writeBoolean)
+   *    p.3 (cuerpo de tres líneas: playername, gamename, score)
+   *    p.4 (Scanner, next(pattern), NFKC, NoSuchElementException
+   *      obligatoria, nombre de jugador sin espacios y de juego con
+   *      espacios, puntuacion de hasta 10 digitos, positiva y convertida
+   *      con Integer.parseInt)
+   *    p.7 (204 si no pasa la validacion)
+   *    p.8 (204 si hay error interno)
+   * - Tema 2b:
+   *    p.2 (rechazar, no arreglar)
+   *    p.4 (expresiones regulares sin comodines, conversiOn de tipos con
+   *          manejo estricto de excepciones)
+   *    p.6 (NFKC)
+   *    p.7 (charset)
+   * Fuentes externas:
+   * - HttpExchange (getRequestBody, sendResponseHeaders, getResponseBody):
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
+   * - Scanner (next(String), nextLine(), hasNext()):
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Scanner.html
+   * - Pattern (sintaxis de [0-9]{1,10}):
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html
+   * - Integer.parseInt:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Integer.html
+   * - NumberFormatException:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/NumberFormatException.html
+   * - NoSuchElementException:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/NoSuchElementException.html
+   * - Normalizer:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
+   * - DataOutputStream (writeBoolean):
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/DataOutputStream.html
    */
   private void handlePostRequest (final HttpExchange exchange)
   {
@@ -128,10 +191,20 @@ public final class ScoreRequestHandler implements HttpHandler {
       {
         linScanner.next("score");
         linScanner.next(":");
-        puntuacionRecibida = Integer.parseInt(linScanner.next());
+        
+        // El patron acepta de 1 a 10 digitos desde 0 a 9
+        // Usamos el parseint, como exige el enunciado, porque 10 digitos
+        // no caben en un simple int
+        puntuacionRecibida = Integer.parseInt(linScanner.next("[0-9]{1,10}"));
         if (linScanner.hasNext())
         {
           throw new NoSuchElementException("Residuo en scores");
+        }
+        
+        // 0 no lo cuento como positivo
+        if (puntuacionRecibida <= 0)
+        {
+          throw new NoSuchElementException("Puntuacion no es positiva");
         }
       }
       resultadoDeAlta = s.newScore(nombreJugador, nombreJuego, puntuacionRecibida);
@@ -169,8 +242,7 @@ public final class ScoreRequestHandler implements HttpHandler {
     try
     {
       exchange.sendResponseHeaders(HTTP_OK, 0);
-      try ( OutputStream os = exchange.getResponseBody();  
-              DataOutputStream dos = new DataOutputStream(os))
+      try ( OutputStream os = exchange.getResponseBody();  DataOutputStream dos = new DataOutputStream(os))
       {
         dos.writeBoolean(resultadoDeAlta);
       }
@@ -219,14 +291,39 @@ public final class ScoreRequestHandler implements HttpHandler {
 
   /**
    * Obtiene puntuaciones de un jugador.
-   * 
-   * Normaliza el nombre que se recibe y le solicita a la bbdd todas las 
+   *
+   * Normaliza el nombre que se recibe y le solicita a la bbdd todas las
    * puntuaciones existentes.
-   * 
+   *
    * Le devuelve al cliente el nombre de cada juego junto con la puntuacion
    * que ha obtenido, cada dato es escrito en diferentes lineas
-   * 
+   *
    * Si falla en cualquier caso se registra el error
+   * 
+   * Fuentes internas: 
+   *  - Enunciado: 
+   *      p.3 
+   *      p.5 (respuesta de varias lineas con OutputStreamWriter)
+   *      p.8 (204 si hay error interno)  
+   *  - Tema 2b:  
+   *      p.6 (NFKC) 
+   *      p.7 (charset) 
+   *
+   * Fuentes externas: 
+   * - URI.getQuery:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
+   * - Normalizer:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
+   * - Map
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Map.Entry.html
+   * - OutputStreamWriter:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
+   * - Writer
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/Writer.html
+   * - String.valueOf:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html
+   * - HttpExchange (sendResponseHeaders, getResponseBody):
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
    */
   private void getPlayerScores (final HttpExchange exchange,
                                 final String playername)
@@ -283,12 +380,37 @@ public final class ScoreRequestHandler implements HttpHandler {
 
   /**
    * Obtiene las puntuaciones de un juego.
-   * 
-   * Normaliza el nombre que se recibe y le solicita a la bbdd todas las 
+   *
+   * Normaliza el nombre que se recibe y le solicita a la bbdd todas las
    * puntuaciones asociadas al juego
-   * 
+   *
    * Le devuelve al cliente el nombre de cada jugador junto con la puntuacion
    * que ha obtenido, cada dato es escrito en diferentes lineas
+   *
+   * Fuentes internas: 
+   *  - Enunciado: 
+   *      p.3  
+   *      p.5 (respuesta de varias lineas con OutputStreamWriter)
+   *      p.8 (204 si hay error interno)  
+   *  - Tema 2b:  
+   *      p.6 (NFKC) 
+   *      p.7 (charset) 
+   *
+   * Fuentes externas: 
+   * - URI.getQuery:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
+   * - Normalizer:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
+   * - Map
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Map.Entry.html
+   * - OutputStreamWriter:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
+   * - Writer
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/Writer.html
+   * - String.valueOf:
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html
+   * - HttpExchange (sendResponseHeaders, getResponseBody):
+   *    https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
    */
   private void getGameScores (final HttpExchange exchange,
                               final String gamename)
@@ -343,9 +465,9 @@ public final class ScoreRequestHandler implements HttpHandler {
   }
 
   /**
-   * Apunta en el registro log lo que ha pasado y cual fue la peticion 
-   * - quien la manda 
-   * - con que metodo fue mandada 
+   * Apunta en el registro log lo que ha pasado y cual fue la peticion
+   * - quien la manda
+   * - con que metodo fue mandada
    * - a que ruta
    *
    * Fuente consultada interna:
