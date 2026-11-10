@@ -16,7 +16,7 @@
  *    p.4 (lectura del cuerpo)
  *    p.7 (registro y excepciones)
  *    p.8 (códigos de respuesta)
- *  - Tema 2b: 
+ *  - Tema 2b:
  *    p.2 (rechazar entradas inválidas)
  *    p.6 (NFKC)
  *    p.7 (charset explícito)
@@ -83,12 +83,20 @@ public final class PlayerRequestHandler implements HttpHandler {
   }
 
   /**
-   * Realiza el alta de un jugador nuevo en la base de datos.
+   * Se realiza el ALTA de un jugador.
    * 
-   * Esta clase lee el cuerpo de la peticion realiada, comprueba
+   * Lee el cuerpo de la peticion, la normaliza y valida que tenga los param
+   * esperados y que el nombre del jugador es valido
+   * 
+   * En caso de que sea correcto entonces se registra en la bbdd mientras que
+   * si registra un error entonces responde un 204 sin cuerpo
+   * 
+   * Cualquier error en la peticion hace que se responda con un 204 sin cuerpo
+   *
+   * Este metodo lee el cuerpo de la peticion realiada, comprueba
    * que el formato de los datos que se reciben son los esperados y
    * realiza el alta del jugador en la base de datos
-   * 
+   *
    * Fuentes internas:
    * - Enunciado:
    *     p.2 (formato para playername y respuesta con writeBoolean)
@@ -96,12 +104,12 @@ public final class PlayerRequestHandler implements HttpHandler {
    *          nombre de jugador sin espacios)
    *     p.7 (204 si no pasa la validacion)
    *     p.8 (204 si hay error interno)
-   * - Tema 2b: 
+   * - Tema 2b:
    *    p.2 (rechazar, no arreglar)
    *    p.6 (NFKC)
    *    p.7 (charset)
    * - SortingHandler: sendResponseHeaders(HTTP_OK, 0)
-   * 
+   *
    * Fuentes externas:
    * - HttpExchange (getRequestBody, sendResponseHeaders, getResponseBody):
    *    https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
@@ -139,10 +147,10 @@ public final class PlayerRequestHandler implements HttpHandler {
         lineScanner.next("playername");
         lineScanner.next(":");
         final String nombre;
-        
+
         // Obtengo el nombre del jugador de la peticion
         nombre = lineScanner.next();
-        
+
         // Cualquier cosa que no sea acerca del jugador
         // la voy a rechazar
         if (lineScanner.hasNext())
@@ -152,7 +160,7 @@ public final class PlayerRequestHandler implements HttpHandler {
         resultadoDeAlta = p.newPlayer(nombre);
       }
     }
-    catch (NoSuchElementException e)
+    catch (final NoSuchElementException e)
     {
       logging(
               Level.WARNING,
@@ -161,10 +169,10 @@ public final class PlayerRequestHandler implements HttpHandler {
       responderSinContenido(exchange);
       return;
     }
-    catch (SQLException e)
+    catch (final SQLException e)
     {
       logging(
-              Level.SEVERE,
+              Level.WARNING,
               e, exchange,
               "Fallo en bbdd al dar de alta al juegador nuevo");
       responderSinContenido(exchange);
@@ -174,16 +182,16 @@ public final class PlayerRequestHandler implements HttpHandler {
     try
     {
       exchange.sendResponseHeaders(HTTP_OK, 0);
-      try ( OutputStream os= exchange.getResponseBody();  
+      try ( OutputStream os= exchange.getResponseBody();
               DataOutputStream dos = new DataOutputStream(os))
       {
         dos.writeBoolean(resultadoDeAlta);
       }
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
       logging(
-              Level.SEVERE,
+              Level.WARNING,
               e, exchange,
               "Error de entrada/salida al escribir respuesta en PUT");
     }
@@ -194,17 +202,17 @@ public final class PlayerRequestHandler implements HttpHandler {
    *
    * He realizado este metodo porque sendRespondeHeader lanza un excepcion de IO
    * y, para todo aquello que se repite, he simplifcado y creado este mtodo en
-   * vez de repetir el try-catch en cada sitio 
+   * vez de repetir el try-catch en cada sitio
    */
   private void responderSinContenido (final HttpExchange exchange)
   {
     try
     {
       exchange.sendResponseHeaders(
-              HTTP_NO_CONTENT, 
+              HTTP_NO_CONTENT,
               NO_CONTENT);
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
       logging(
               Level.WARNING,
@@ -213,6 +221,30 @@ public final class PlayerRequestHandler implements HttpHandler {
     }
   }
 
+  /**
+  * Lista de jugadores.
+  * 
+  * Obtiene la lista de jugadores y se las envia al cliente.
+  * Escribe a cada jugador en un linea diferente
+  * 
+  * Obtengo la lista antes de enviar 200, si ocurre algun fallo
+  * entonces envio 204
+  * 
+  * Fuentes internas:
+  *   - Enunciado:
+  *     p.2 (GET /player: cuerpo vacío, un nombre por línea)
+  *     p.5 (respuesta de varias líneas con OutputStreamWriter)
+  *     p.8 (204 si hay error interno)
+  *   - Tema 2b: p.7 (charset explícito)
+  *
+  * Fuentes externas:
+  *   - OutputStreamWriter:
+  *     https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
+  *   - StandardCharsets:
+  *     https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/StandardCharsets.html
+  *   - HttpExchange (sendResponseHeaders, getResponseBody):
+  *     https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
+  */
   private void handleGetRequest (final HttpExchange exchange)
   {
     final Players p = new Players();
@@ -244,7 +276,7 @@ public final class PlayerRequestHandler implements HttpHandler {
     catch (final IOException ex)
     {
       logging(
-              Level.SEVERE,
+              Level.WARNING,
               ex,
               exchange,
               "Error de entrada/salida al escribir el listado de jugadores en GET");
@@ -255,14 +287,13 @@ public final class PlayerRequestHandler implements HttpHandler {
    * Apunta en el registro log lo que ha pasado y cual fue la peticion - quien
    * la manda - con que metodo fue mandada - a que ruta
    *
-   * Fuente consultada interna: 
-   *  - Enunciado: 
-   *    p.7 (la firma viene de ahí, y el registro de excepciones va en este nivel) 
+   * Fuente consultada interna:
+   *  - Enunciado:
+   *    p.7 (la firma viene de ahí, y el registro de excepciones va en este nivel)
    * - Fuentes externas:
    *  https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
    *  https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html
    *  https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message
-   *  https://docs.astral.sh/ruff/rules/logging-string-format/
    *  https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
    *  https://docs.oracle.com/en/java/javase/11/docs/api/java.logging/java/util/logging/Logger.html
    */
@@ -276,7 +307,7 @@ public final class PlayerRequestHandler implements HttpHandler {
             "%s - %s - %s - %s",
             exchange.getRemoteAddress().toString(),
             exchange.getRequestMethod(),
-            exchange.getRequestURI().getPath(), /* scores atiende dos get */
+            exchange.getRequestURI().getPath(),
             eventDescription);
 
     LOGGER.log(level, mensaje, ex);
