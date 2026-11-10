@@ -89,9 +89,9 @@ public final class PlayerRequestHandler implements HttpHandler {
          * > Normalizamos cada linea a la forma NFKC 
          * > Usamos Tema 2b, p.6 donde se extiende consenso en emplear NFKC
          */
-        final String lineaJson = bodyScanner.nextLine();
+        final String lineaCuerpo = bodyScanner.nextLine();
         final String lineaNormalizada = Normalizer.normalize(
-                lineaJson, 
+                lineaCuerpo, 
                 Normalizer.Form.NFKC);
 
         /**
