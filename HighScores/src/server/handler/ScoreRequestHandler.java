@@ -13,9 +13,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,9 +54,77 @@ public final class ScoreRequestHandler implements HttpHandler {
 
   }
 
-  private void handlePostRequest (final HttpExchange exchange) {
+  private void handlePostRequest (final HttpExchange exchange) 
+  {
+    final Scores s;
+    final boolean resultadoDeAlta;
     
-    // TODO
+    s = new Scores();
+    
+    try (Scanner bodyScanner = new Scanner(
+            exchange.getRequestBody(), 
+            StandardCharsets.UTF_8.name()))
+    {
+        final String lineaCuerpo, lineaNormalizada;
+        lineaCuerpo = bodyScanner.nextLine();
+        lineaNormalizada = Normalizer.normalize(
+                lineaCuerpo,
+                Normalizer.Form.NFKC);
+        
+        try ( Scanner linScanner = new Scanner( lineaNormalizada ))
+        {
+            final String playername;
+            final String gameNameAntesDeTrim;
+            final int score;
+            
+            linScanner.next("playername");
+            linScanner.next(":");
+            
+            
+            playername =linScanner.next();
+            
+            linScanner.next("gamename");
+            linScanner.next(":");
+            gameNameAntesDeTrim = linScanner.next();
+            linScanner.next("score");
+            linScanner.next(":");
+            score= linScanner.nextInt();
+            if (linScanner.hasNext())
+            {
+                throw new NoSuchElementException("Residuo");
+            }
+            resultadoDeAlta = s.newScore(playername, gameNameAntesDeTrim, score);
+        }
+    }
+    catch(final NoSuchElementException e) 
+    {
+        logging(Level.WARNING, e, exchange, "param incorrectos en de puntuaciones");
+        responderSinContenido(exchange);
+        return;
+    }
+    catch(final SQLException e) 
+    {
+        logging(Level.WARNING, e, exchange, "fallo en bbdd al dar de alta la puntuacion");
+        responderSinContenido(exchange);
+        return;
+    }
+    try
+    {
+        exchange.sendResponseHeaders(HTTP_OK, 0);
+        try (OutputStream os = exchange.getResponseBody();
+                DataOutputStream dos = new DataOutputStream(os))
+        {
+            dos.writeBoolean(resultadoDeAlta);
+        }
+    }
+    catch(final IOException e)
+    {
+        logging(
+                Level.WARNING, 
+                e, 
+                exchange, 
+                "Error de i/o al escribir respuesta en POST");
+    }
 
   }
   
@@ -79,7 +151,8 @@ public final class ScoreRequestHandler implements HttpHandler {
   }
   
   private void getPlayerScores (final HttpExchange exchange,
-                                final String playername) {
+                                final String playername) 
+  {
 
     // TODO
 
@@ -90,6 +163,33 @@ public final class ScoreRequestHandler implements HttpHandler {
 
     // TODO
 
-  }    
-
+  }
+  private void logging (
+          final Level level, 
+          final Exception ex, 
+          final HttpExchange exchange, 
+          final String eventDescription) 
+  {
+      final String mensaje = String.format(
+              "%s - %s - %s - %s", 
+              exchange.getRemoteAddress().toString(), 
+              exchange.getRequestMethod(), 
+              exchange.getRequestURI().getPath(),   
+              eventDescription);
+      
+      LOGGER.log(level, mensaje, ex);
+  }
+  private void responderSinContenido(final HttpExchange exchange) 
+  {
+    try 
+    {
+        exchange.sendResponseHeaders(HTTP_NO_CONTENT, NO_CONTENT);
+    } catch (IOException e) 
+    {
+        logging(
+                Level.WARNING, 
+                e, exchange, 
+                "No se pudo enviar el codigo 204 al cliente");
+    }
+  }
 }
