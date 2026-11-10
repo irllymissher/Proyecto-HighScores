@@ -77,18 +77,21 @@ public final class ScoreRequestHandler implements HttpHandler {
             final String gameNameAntesDeTrim;
             final int score;
             
+            /* Para jugador */
             linScanner.next("playername");
             linScanner.next(":");
-            
-            
             playername =linScanner.next();
             
+            /* Para juego */
             linScanner.next("gamename");
             linScanner.next(":");
-            gameNameAntesDeTrim = linScanner.next();
+            gameNameAntesDeTrim = linScanner.nextLine().trim();
+            
+            /* Para scores */
             linScanner.next("score");
             linScanner.next(":");
             score= linScanner.nextInt();
+            
             if (linScanner.hasNext())
             {
                 throw new NoSuchElementException("Residuo");

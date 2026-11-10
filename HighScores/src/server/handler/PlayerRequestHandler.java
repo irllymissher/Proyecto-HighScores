@@ -131,7 +131,10 @@ public final class PlayerRequestHandler implements HttpHandler {
     } 
     catch(NoSuchElementException e) 
     {
-        logging(Level.WARNING, e, exchange, "Parametros incorrectos en PUT");
+        logging(
+                Level.WARNING, 
+                e, exchange, 
+                "Parametros incorrectos en PUT");
         responderSinContenido(exchange);
         return;
     }
@@ -143,7 +146,10 @@ public final class PlayerRequestHandler implements HttpHandler {
      */
     catch(SQLException e) 
     {
-        logging(Level.SEVERE, e, exchange, "Fallo en bbdd al dar de alta al juegador nuevo");
+        logging(
+                Level.SEVERE, 
+                e, exchange, 
+                "Fallo en bbdd al dar de alta al juegador nuevo");
         responderSinContenido(exchange);
         return;
     }
