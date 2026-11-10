@@ -239,11 +239,58 @@ public final class ScoreRequestHandler implements HttpHandler {
   }
   
   private void getGameScores (final HttpExchange exchange,
-                              final String gamename) {
-
-    // TODO
+                              final String gamename) 
+  {
+    final Scores s = new Scores();
+    
+    try
+    {
+        final String nombreNormalizado;
+        final Map < String, Integer > listaPuntuaciones;
+        
+        nombreNormalizado = Normalizer.normalize(
+                gamename,
+                Normalizer.Form.NFKC);
+        
+        listaPuntuaciones = s.getGameScores(nombreNormalizado);
+        
+        exchange.sendResponseHeaders(HTTP_OK, 0);
+        
+        try( final OutputStream os = exchange.getResponseBody();
+                final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8))
+        {
+            for ( final Map.Entry <String, Integer>entrada : listaPuntuaciones.entrySet())
+            {
+                w.write("playername : ");
+                w.write(entrada.getKey());
+                w.write("\n");
+                w.write("score : ");
+                w.write(String.valueOf(entrada.getValue()));
+                w.write("\n");
+            }
+            
+        }
+    } 
+    catch (final IOException ex) 
+    {
+        logging(
+                Level.WARNING, 
+                ex, 
+                exchange, 
+                "Error de i/o al escribir las puntuaciones del juego ");
+    } 
+    catch (final SQLException ex) 
+    {
+        logging(
+                Level.WARNING, 
+                ex, 
+                exchange, 
+                "Fallo en bbdd para obtener puntuaciones");
+        responderSinContenido(exchange);
+    }
 
   }
+
   private void logging (
           final Level level, 
           final Exception ex, 
