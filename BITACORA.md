@@ -88,3 +88,34 @@
   - rechazo lo que sobre despues del nombre (residuo)
   - Players se crea dentro del metodo porque RequestComponent arranca antes que la BD
   
+
+## 2026-11-10
+- Hecho:
+  - GameRequestHandler y el del Score realizados completamente y los 7 servicios
+  que pide el enunciado estan resueltos completamente 
+- Fallos:
+  - en el POST leia solo la primera linea del cuerpo y buscaba los 3 campos en ella;
+  el cliente manda 3 lineas (playername, gamename, score), hay que leer una linea
+  del cuerpo por cada campo
+  - al copiar el bloque de score deje next("gamename") en vez de next("score")
+  - declare las lineas normalizadas de juego y puntuacion pero seguia escaneando
+  la del jugador
+  - en los GET de puntuaciones escribi "gamename: " sin espacio antes de los dos
+  puntos y el cliente no lo entiende (hace next(":") como token aparte)
+  - tenia los catch intercambiados: el 204 iba en el de IOException, cuando el
+  200 ya estaba enviado
+- Fuentes:
+  - Cliente del profe y pdf
+- Dudas/Decisiones:
+  - los nombres de juego pueden llevar espacios: leo el resto de la linea con
+  nextLine().trim(), como hace el cliente PlayerScores l.81; por eso en juegos
+  no compruebo residuo y en jugadores si
+  - la puntuacion la leo con nextInt(): si no es un numero o no cabe en un int lanza
+  InputMismatchException, que es hija de NoSuchElementException, asi que no
+  necesito un catch aparte ni Integer.parseInt
+  - no paso el nombre del juego a mayusculas en el handler, ya lo hace Games
+  - para escribir la puntuacion uso String.valueOf: Writer.write(int) escribe un
+  caracter, no el numero
+  - pendiente para la validacion: puntuaciones negativas (dije el 8-nov que se
+  validaban en el handler y aun no esta), /score sin consulta y ?playername= vacio
+  hacen fallar el handleGetRequest del profesor
