@@ -232,7 +232,7 @@ public final class ScoreRequestHandler implements HttpHandler {
                 Level.WARNING, 
                 ex, 
                 exchange, 
-                "Fallo en bbdd para obtener jugadores");
+                "Fallo en bbdd para obtener puntuaciones");
         responderSinContenido(exchange);
     }
 
