@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -187,7 +188,53 @@ public final class ScoreRequestHandler implements HttpHandler {
                                 final String playername) 
   {
 
-    // TODO
+    final Scores s = new Scores();
+    
+    try
+    {
+        final String nombreNormalizado;
+        final Map < String, Integer > listaPuntuaciones;
+        
+        nombreNormalizado = Normalizer.normalize(
+                playername,
+                Normalizer.Form.NFKC);
+        
+        listaPuntuaciones = s.getPlayerScores(nombreNormalizado);
+        
+        exchange.sendResponseHeaders(HTTP_OK, 0);
+        
+        try( final OutputStream os = exchange.getResponseBody();
+                final Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8))
+        {
+            for ( final Map.Entry <String, Integer>entrada : listaPuntuaciones.entrySet())
+            {
+                w.write("gamename: ");
+                w.write(entrada.getKey());
+                w.write("\n");
+                w.write("score: ");
+                w.write(String.valueOf(entrada.getValue()));
+                w.write("\n");
+            }
+            
+        }
+    } 
+    catch (IOException ex) 
+    {
+        logging(
+                Level.WARNING, 
+                ex, 
+                exchange, 
+                "Fallo en bbdd para obtener jugadores");
+        responderSinContenido(exchange);
+    } 
+    catch (SQLException ex) 
+    {
+        logging(
+                Level.WARNING, 
+                ex, 
+                exchange, 
+                "Error de i/o al escribir las puntuaciones del jugador ");
+    }
 
   }
   
@@ -217,7 +264,7 @@ public final class ScoreRequestHandler implements HttpHandler {
     try 
     {
         exchange.sendResponseHeaders(HTTP_NO_CONTENT, NO_CONTENT);
-    } catch (IOException e) 
+    } catch (final IOException e) 
     {
         logging(
                 Level.WARNING, 
