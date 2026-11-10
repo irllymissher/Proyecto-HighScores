@@ -218,7 +218,15 @@ public final class ScoreRequestHandler implements HttpHandler {
             
         }
     } 
-    catch (IOException ex) 
+    catch (final IOException ex) 
+    {
+        logging(
+                Level.WARNING, 
+                ex, 
+                exchange, 
+                "Error de i/o al escribir las puntuaciones del jugador ");
+    } 
+    catch (final SQLException ex) 
     {
         logging(
                 Level.WARNING, 
@@ -226,14 +234,6 @@ public final class ScoreRequestHandler implements HttpHandler {
                 exchange, 
                 "Fallo en bbdd para obtener jugadores");
         responderSinContenido(exchange);
-    } 
-    catch (SQLException ex) 
-    {
-        logging(
-                Level.WARNING, 
-                ex, 
-                exchange, 
-                "Error de i/o al escribir las puntuaciones del jugador ");
     }
 
   }
