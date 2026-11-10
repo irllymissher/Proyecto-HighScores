@@ -76,7 +76,6 @@ public final class ScoreRequestHandler implements HttpHandler {
         lineaNormalizada = Normalizer.normalize(
                 lineaCuerpo,
                 Normalizer.Form.NFKC);
-        
         /* JUGADOR */
         try ( Scanner linScanner = new Scanner( lineaNormalizada ))
         {
@@ -89,8 +88,12 @@ public final class ScoreRequestHandler implements HttpHandler {
             }
         }
         
+        lineaJuego = bodyScanner.nextLine();
+        lineaNormalzadaJuego = Normalizer.normalize(
+                lineaJuego, 
+                Normalizer.Form.NFKC);
         /* JUEGO */
-        try ( Scanner linScanner = new Scanner( lineaNormalizada ))
+        try ( Scanner linScanner = new Scanner( lineaNormalzadaJuego ))
         {
             linScanner.next("gamename");
             linScanner.next(":");
@@ -101,8 +104,12 @@ public final class ScoreRequestHandler implements HttpHandler {
             }
         }
         
+        lineaPuntuacion = bodyScanner.nextLine();
+        lineaNormalizadaPuntuacion = Normalizer.normalize(
+                lineaPuntuacion, 
+                Normalizer.Form.NFKC);
         /* PUNTUACION*/
-        try ( Scanner linScanner = new Scanner( lineaNormalizada ))
+        try ( Scanner linScanner = new Scanner( lineaNormalizadaPuntuacion ))
         {
             linScanner.next("gamename");
             linScanner.next(":");
