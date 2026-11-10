@@ -53,7 +53,8 @@ public final class GameRequestHandler implements HttpHandler {
 
   }
 
-  private void handlePutRequest (final HttpExchange exchange) {
+  private void handlePutRequest (final HttpExchange exchange) 
+  {
 
     final Games g = new Games();
     final boolean resultadoDeAlta;
@@ -126,9 +127,41 @@ public final class GameRequestHandler implements HttpHandler {
     }
   }
 
-  private void handleGetRequest (final HttpExchange exchange) {
-
-    // TODO
+  private void handleGetRequest (final HttpExchange exchange) 
+  {
+      
+      final Games g = new Games();
+      
+      try
+      {
+          final List< String> listaJuegos;
+          listaJuegos=g.getGames();
+          
+          exchange.sendResponseHeaders(
+                  HTTP_OK, 
+                  0);
+          
+          try (final OutputStream os= exchange.getResponseBody();
+                  final Writer w= new OutputStreamWriter(
+                                  os, 
+                                  StandardCharsets.UTF_8))
+          {
+              for (final String j: listaJuegos)
+              {
+                  w.write(j);
+                  w.write("\n");
+              }
+          }
+      }
+      catch(final SQLException ex)
+      {
+          logging(Level.WARNING, ex, exchange, "Fallo en bdd al conseguir los juegos");
+          responderSinContenido(exchange);
+      }
+      catch (final IOException ex)
+      {
+          logging(Level.WARNING, ex, exchange, "Error de i/o al escribir el listado de juegos");
+      }
 
   }
 
