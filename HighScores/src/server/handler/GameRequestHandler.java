@@ -91,13 +91,19 @@ public final class GameRequestHandler implements HttpHandler {
     }
     catch ( final NoSuchElementException e) 
     {
-      logging(Level.WARNING, e, exchange, "Param incorrectos para PUT en juegos");
+      logging(
+              Level.WARNING, 
+              e, exchange, 
+              "Param incorrectos para PUT en juegos");
       responderSinContenido(exchange);
       return;
     }
     catch ( final SQLException e) 
     {
-        logging(Level.WARNING, e, exchange, "falo en la bbd al dar de alta al juego");
+        logging(
+                Level.WARNING, 
+                e, exchange, 
+                "falo en la bbd al dar de alta al juego");
         responderSinContenido(exchange);
         return;
     }
@@ -152,7 +158,10 @@ public final class GameRequestHandler implements HttpHandler {
               exchange.getRequestURI().getPath(),   /* scores atiende dos get */
               eventDescription);
       
-      LOGGER.log(level, mensaje, ex);
+      LOGGER.log(
+              level, 
+              mensaje, 
+              ex);
   }
   
 }
