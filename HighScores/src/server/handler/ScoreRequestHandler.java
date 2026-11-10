@@ -111,7 +111,7 @@ public final class ScoreRequestHandler implements HttpHandler {
         /* PUNTUACION*/
         try ( Scanner linScanner = new Scanner( lineaNormalizadaPuntuacion ))
         {
-            linScanner.next("gamename");
+            linScanner.next("score");
             linScanner.next(":");
             puntuacionRecibida =linScanner.nextInt();
             if (linScanner.hasNext())
