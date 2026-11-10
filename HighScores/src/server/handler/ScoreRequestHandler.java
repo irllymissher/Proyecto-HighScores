@@ -58,6 +58,9 @@ public final class ScoreRequestHandler implements HttpHandler {
   {
     final Scores s;
     final boolean resultadoDeAlta;
+    final String nombreJugador;
+    final int puntuacionRecibida;
+    final String nombreJuego;
     
     s = new Scores();
     
@@ -66,48 +69,68 @@ public final class ScoreRequestHandler implements HttpHandler {
             StandardCharsets.UTF_8.name()))
     {
         final String lineaCuerpo, lineaNormalizada;
+        final String lineaJuego, lineaNormalzadaJuego;
+        final String lineaPuntuacion, lineaNormalizadaPuntuacion;
+        
         lineaCuerpo = bodyScanner.nextLine();
         lineaNormalizada = Normalizer.normalize(
                 lineaCuerpo,
                 Normalizer.Form.NFKC);
         
+        /* JUGADOR */
         try ( Scanner linScanner = new Scanner( lineaNormalizada ))
         {
-            final String playername;
-            final String gameNameAntesDeTrim;
-            final int score;
-            
-            /* Para jugador */
             linScanner.next("playername");
             linScanner.next(":");
-            playername =linScanner.next();
-            
-            /* Para juego */
-            linScanner.next("gamename");
-            linScanner.next(":");
-            gameNameAntesDeTrim = linScanner.nextLine().trim();
-            
-            /* Para scores */
-            linScanner.next("score");
-            linScanner.next(":");
-            score= linScanner.nextInt();
-            
+            nombreJugador =linScanner.next();
             if (linScanner.hasNext())
             {
-                throw new NoSuchElementException("Residuo");
+                throw new NoSuchElementException( "Residuo en jugador" );
             }
-            resultadoDeAlta = s.newScore(playername, gameNameAntesDeTrim, score);
         }
+        
+        /* JUEGO */
+        try ( Scanner linScanner = new Scanner( lineaNormalizada ))
+        {
+            linScanner.next("gamename");
+            linScanner.next(":");
+            nombreJuego =linScanner.nextLine().trim();
+            if (nombreJuego.isEmpty())
+            {
+                throw new NoSuchElementException( "Nombre de juego vacio" );
+            }
+        }
+        
+        /* PUNTUACION*/
+        try ( Scanner linScanner = new Scanner( lineaNormalizada ))
+        {
+            linScanner.next("gamename");
+            linScanner.next(":");
+            puntuacionRecibida =linScanner.nextInt();
+            if (linScanner.hasNext())
+            {
+                throw new NoSuchElementException( "Residuo en scores" );
+            }
+        }
+        resultadoDeAlta = s.newScore(nombreJugador, nombreJuego, puntuacionRecibida);
     }
     catch(final NoSuchElementException e) 
     {
-        logging(Level.WARNING, e, exchange, "param incorrectos en de puntuaciones");
+        logging(
+                Level.WARNING, 
+                e, 
+                exchange, 
+                "param incorrectos en de puntuaciones");
         responderSinContenido(exchange);
         return;
     }
     catch(final SQLException e) 
     {
-        logging(Level.WARNING, e, exchange, "fallo en bbdd al dar de alta la puntuacion");
+        logging(
+                Level.WARNING, 
+                e, 
+                exchange, 
+                "fallo en bbdd al dar de alta la puntuacion");
         responderSinContenido(exchange);
         return;
     }
