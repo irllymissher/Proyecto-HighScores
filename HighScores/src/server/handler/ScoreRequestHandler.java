@@ -64,6 +64,13 @@ public final class ScoreRequestHandler implements HttpHandler {
   static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 
   static private final int NO_CONTENT = -1;
+  
+  // MODIFICACION: parecido a lo que se realiza en la asignatura de procesadores del lenguaje
+  // Permito una cantidad de caracteres
+  // Permito una longitud de 1 a 63
+  // Exluyo el uso de la barra inicial `/`
+  // Permito que, por lo menos, exista una letra en cualquier posicion
+  static private final String PATRON_DEL_NOMBRE_DEL_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
 
   @Override
   public void handle(final HttpExchange exchange) throws IOException {
@@ -159,7 +166,9 @@ public final class ScoreRequestHandler implements HttpHandler {
       {
         linScanner.next("playername");
         linScanner.next(":");
-        nombreJugador = linScanner.next();
+        
+        // Validacion del nombre exactamente como se pide
+        nombreJugador = linScanner.next(PATRON_DEL_NOMBRE_DEL_JUGADOR);
         if (linScanner.hasNext())
         {
           throw new NoSuchElementException("Residuo en jugador");
