@@ -54,6 +54,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 //
 import server.db.Scores;
 //
@@ -71,6 +73,7 @@ public final class ScoreRequestHandler implements HttpHandler {
   // Exluyo el uso de la barra inicial `/`
   // Permito que, por lo menos, exista una letra en cualquier posicion
   static private final String PATRON_DEL_NOMBRE_DEL_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
+  static private final Pattern PATRON_DEL_NOMBRE_DEL_JUEGO = Pattern.compile("[a-zA-Z0-9 -]{1,127}");
 
   @Override
   public void handle(final HttpExchange exchange) throws IOException {
@@ -146,6 +149,7 @@ public final class ScoreRequestHandler implements HttpHandler {
     final String nombreJugador;
     final int puntuacionRecibida;
     final String nombreJuego;
+    final Matcher validarNombreJuego;
 
     s = new Scores();
 
@@ -185,10 +189,20 @@ public final class ScoreRequestHandler implements HttpHandler {
         linScanner.next("gamename");
         linScanner.next(":");
         nombreJuego = linScanner.nextLine().trim();
+        
+        validarNombreJuego = PATRON_DEL_NOMBRE_DEL_JUEGO.matcher(nombreJuego);
+        
+        if (!validarNombreJuego.matches())
+        {
+          throw new NoSuchElementException("El nombre del juego no cumple el estandar requerido");
+        }
+        
+        /* YA NO SE EJECUTA PORQUE MATCHES CUBRE ESTA PARTE Y LANZA EXCEPCION
         if (nombreJuego.isEmpty())
         {
           throw new NoSuchElementException("Nombre de juego vacio");
         }
+        */
       }
 
       lineaPuntuacion = bodyScanner.nextLine();
