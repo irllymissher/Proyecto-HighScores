@@ -258,15 +258,65 @@ public final class ScoreRequestHandler implements HttpHandler {
 
   }
 
+  /**
+   * Este metodo procesa las solicitudes GET para obtener las listas de puntuaciones
+   * 
+   * Se valida la estructura de los parametros de la consulta antes de realizar la 
+   * busqueda de la base de datos
+   * 
+   * Si la consulta falta o esta mal formada responde un 204, si es una clave 
+   * desconocida responde 400
+   * 
+   * Fuentes internas:
+   *  - Enunciado:
+   *      p.3 (forma esperada -> clave=valor, sin espacios)
+   *      p.4 (validacion de formato e informacion recibida)
+   *      p.7 (peticiones invalida = respuesta HTTP NO CONTENT)
+   * - Tema 2b: 
+   *      p.1 (comprobacion antes de la llamada a getPlayerScores/getGameScores)
+   *      p.2 (no dar por hecho que la consulta existe, responder 204 en vez de
+   *          de intenetar arreglar la consulta, URL no confiable)
+   *      p.4 (comprobacion  de tipo y estructura esperada)
+   * - Anexo 1 (Protocolo HTTP en Java SE):
+   *      p.5 (?query es un string con params de consulta opcionales, hay que revisar)
+   *      p.6 (la consulta tiene forma nombre=valor)
+   * 
+   * Fuentes externas:
+   *  - URI.getQuery()
+   *      https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
+   *  - String.split(String)
+   *      https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html
+   *  - Validate inputs (Guideline 5-1 / INPUT-1)
+   *      https://www.oracle.com/java/technologies/javase/seccodeguide.html
+   */
   private void handleGetRequest (final HttpExchange httpExchange)
   {
 
     final URI uri = httpExchange.getRequestURI();
     final String queryGroup = uri.getQuery();
-    final String[] parts = queryGroup.split("=");
-
+    
+    ////////////////////////////// MODIFICACION ////////////////////////////////////////
+    if (queryGroup == null ||queryGroup.isEmpty())
+    {
+      LOGGER.warning("La peticion get fue rechazada, la query es nula o esta vacia");
+      responderSinContenido(httpExchange);
+      return;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////
+    
     LOGGER.info(queryGroup);
 
+    final String[] parts = queryGroup.split("=");
+    
+    ////////////////////////////// MODIFICACION ////////////////////////////////////////
+    if (parts.length != 2)
+    {
+      LOGGER.warning("La peticion get fue rechazada, query tiene estructura invalida");
+      responderSinContenido(httpExchange);
+      return;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////
+    
     try
     {
       if ("playername".compareTo(parts[0]) == 0)
