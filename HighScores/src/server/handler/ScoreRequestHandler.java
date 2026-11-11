@@ -417,7 +417,7 @@ public final class ScoreRequestHandler implements HttpHandler {
               playername,
               Normalizer.Form.NFKC);
 
-      // Validacion del parametro URL
+      // Validacion del parametro URL 
       validarPuntuacionJugador = PATRON_DEL_NOMBRE_DEL_JUGADOR_2.matcher(nombreNormalizado);
       if (!validarPuntuacionJugador.matches())
       {
@@ -502,7 +502,8 @@ public final class ScoreRequestHandler implements HttpHandler {
                               final String gamename)
   {
     final Scores s = new Scores();
-
+    final Matcher validarPuntuacionJuego;
+    
     try
     {
       final String nombreNormalizado;
@@ -512,6 +513,15 @@ public final class ScoreRequestHandler implements HttpHandler {
               gamename,
               Normalizer.Form.NFKC);
 
+      // Validacion del parametro URL 
+      validarPuntuacionJuego = PATRON_DEL_NOMBRE_DEL_JUEGO.matcher(nombreNormalizado);
+      if (!validarPuntuacionJuego.matches())
+      {
+        LOGGER.warning("consulta rechazada, el formato del nombre del juego no cumple el estandar");
+        responderSinContenido(exchange);
+        return;
+      }
+      
       listaPuntuaciones = s.getGameScores(nombreNormalizado);
 
       exchange.sendResponseHeaders(HTTP_OK, 0);
