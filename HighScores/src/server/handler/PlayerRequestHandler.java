@@ -20,10 +20,13 @@
  *    p.2 (rechazar entradas inválidas)
  *    p.6 (NFKC)
  *    p.7 (charset explícito)
+ *    p.4 (sin comodines, porque no van ^ y $)
  *  - SortingHandler (proyecto SortingService): estructura en 3 bloques
  *
  * Fuentes externas:
  *   - HttpHandler: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
+ *   - Pattern: https://sppcontests.org/lang_docs/jdk-11.0.24_doc-all/docs/api/java.base/java/util/regex/Pattern.html
+ *              https://javadoc.scijava.org/Java11/java.base/java/util/regex/class-use/Pattern.html
  */
 package server.handler;
 
@@ -62,6 +65,13 @@ public final class PlayerRequestHandler implements HttpHandler {
   static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 
   static private final int NO_CONTENT = -1;
+  
+  // MODIFICACION: parecido a lo que se realiza en la asignatura de procesadores del lenguaje
+  // Permito una cantidad de caracteres
+  // Permito una longitud de 1 a 63
+  // Exluyo el uso de la barra inicial `/`
+  // Permito que, por lo menos, exista una letra en cualquier posicion
+  static private final String PATRON_DEL_NOMBRE_DEL_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
 
   @Override
   public void handle(final HttpExchange exchange) throws IOException {
@@ -149,7 +159,8 @@ public final class PlayerRequestHandler implements HttpHandler {
         final String nombre;
 
         // Obtengo el nombre del jugador de la peticion
-        nombre = lineScanner.next();
+        // Validamos este token mediante la REGEX de lo permitido
+        nombre = lineScanner.next(PATRON_DEL_NOMBRE_DEL_JUGADOR);
 
         // Cualquier cosa que no sea acerca del jugador
         // la voy a rechazar
