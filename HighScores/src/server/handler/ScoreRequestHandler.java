@@ -74,6 +74,9 @@ public final class ScoreRequestHandler implements HttpHandler {
   // Permito que, por lo menos, exista una letra en cualquier posicion
   static private final String PATRON_DEL_NOMBRE_DEL_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
   static private final Pattern PATRON_DEL_NOMBRE_DEL_JUEGO = Pattern.compile("[a-zA-Z0-9 -]{1,127}");
+  
+  // nScanner.next(Pattern) se acepta como parametro un Pattern
+  static private final Pattern PATRON_DEL_NOMBRE_DEL_JUGADOR_2 = Pattern.compile("(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}");
 
   @Override
   public void handle(final HttpExchange exchange) throws IOException {
@@ -403,7 +406,8 @@ public final class ScoreRequestHandler implements HttpHandler {
   {
 
     final Scores s = new Scores();
-
+    final Matcher validarPuntuacionJugador;
+    
     try
     {
       final String nombreNormalizado;
@@ -413,6 +417,15 @@ public final class ScoreRequestHandler implements HttpHandler {
               playername,
               Normalizer.Form.NFKC);
 
+      // Validacion del parametro URL
+      validarPuntuacionJugador = PATRON_DEL_NOMBRE_DEL_JUGADOR_2.matcher(nombreNormalizado);
+      if (!validarPuntuacionJugador.matches())
+      {
+        LOGGER.warning("consulta rechazada, el formato del nombre del jugador no cumple el estandar");
+        responderSinContenido(exchange);
+        return;
+      }
+      
       listaPuntuaciones = s.getPlayerScores(nombreNormalizado);
 
       exchange.sendResponseHeaders(HTTP_OK, 0);
