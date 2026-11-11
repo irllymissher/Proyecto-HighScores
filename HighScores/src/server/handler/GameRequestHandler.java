@@ -48,6 +48,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 //
 import server.db.Games;
 //
@@ -58,6 +60,9 @@ public final class GameRequestHandler implements HttpHandler {
   static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 
   static private final int NO_CONTENT = -1;
+  
+  // Debe de ser de tipo Pattern para usar matcher() a diferencia de String que usa next(String)
+  static private final Pattern PATRON_NOMBRE_JUEGO = Pattern.compile("[a-zA-Z0-9 -]{1,127}");
 
   @Override
   public void handle(final HttpExchange exchange) throws IOException {
@@ -117,7 +122,8 @@ public final class GameRequestHandler implements HttpHandler {
 
     final Games g = new Games();
     final boolean resultadoDeAlta;
-
+    final Matcher validarNombrePatron;
+    
     try ( Scanner bodyScanner
                   = new Scanner(
                     exchange.getRequestBody(),
@@ -145,14 +151,23 @@ public final class GameRequestHandler implements HttpHandler {
         //los juegos pueden llegar espacio
         nombreAntesDeTrim = lineScanner.nextLine();
         nombreDespuesDeTRim = nombreAntesDeTrim.trim();
-
-        // Trim no me devuelve error si ocurre algo
-        // decido comprobarlo
+        
+        // Saltaba un error porque no encontraba matcher, pero despues de leer
+        // la documentacion habia que ponerle de tipo Pattern y NO String
+        validarNombrePatron = PATRON_NOMBRE_JUEGO.matcher(nombreDespuesDeTRim);
+        
+        if (!validarNombrePatron.matches())
+        {
+          throw new NoSuchElementException("El nombre del juego no cumple el estandar requerido");
+        }
+        
+        
+        /* YA NO SE EJECUTA PORQUE MATCHES CUBRE ESTA PARTE Y LANZA EXCEPCION
         if (nombreDespuesDeTRim.isEmpty())
         {
           throw new NoSuchElementException("Nombre de juego vacio tras limpiar espacios");
         }
-
+        */
         // Games se encarga de ponerlo en mayusculas
         resultadoDeAlta = g.newGame(nombreDespuesDeTRim);
       }
