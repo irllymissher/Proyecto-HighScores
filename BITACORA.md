@@ -119,3 +119,31 @@
   - pendiente para la validacion: puntuaciones negativas (dije el 8-nov que se
   validaban en el handler y aun no esta), /score sin consulta y ?playername= vacio
   hacen fallar el handleGetRequest del profesor
+
+  ## 2026-11-10 (a la tarde)
+- Hecho:
+  - Puse los comentarios y javadoc correspondientes encima de los metodos y aclarando
+  ciertas lineas que podrian dar a ambiguedades
+  - Formato realizado a mi manera de hacer codigo con opciones de NetBeans
+  - puntuacion hehca para que lea de 1 a 10 digitos con Integer.parseInt
+- Fallos:
+  - usé nextInt() por leer documentaicon en vez de lo que se me pedia integramente
+- Ddudas/Decisiones:
+  - 0 cero no cuenta como nada asi que apartir de 1 es positivo para mi
+
+## 2026-11-11 
+- Hecho
+  - Validacion para el get de /scores, escrito por MAZ, no cambie las lineas del profe
+  simplemente añadi comprobaciones
+  - Hice los patrones del jugador y del juego validando con Pattern/Matcher//matches() 
+  - valido el nombre, de las puntuaciones, que llegan por URL antes de ir a la BD
+- Fallos:
+  - me di cuenta que el metodo get del profesor MAZ no respondia ?playername= por lo que
+  se perdia la peticion (arreglado, por supuesto)
+  - los comodines fueron elimimnados de las regex
+  - matcher() no se hace sobre un String, si se hace sobre un Pattern
+- Decisiones/Dudas:
+  - Hay metodos que no se pueden modfiicar como RequestComponent o DBComponent, en
+  otras partes del codigo, escritas por el profesor, decidí no tocarla si no mas bien
+  hacer comprobaciones pertinentens a lo escrito
+  - isEmpty() queda comentado porque el patron ya rechaza el nombre vacio
