@@ -40,44 +40,46 @@ public final class Games {
 
   }
 
-    public boolean newGame(final String name) throws SQLException 
+  public boolean newGame (final String name) throws SQLException
+  {
+    if (name == null)
     {
-        final String juegoEnMayusc = name.toUpperCase();
-        final String consulta = "insert into Games (GameId, GameName) values (?, ?)";
-        // Si el juego ya está registrado, se devuelve false.
-        if (name==null)
-        {
-            return false;
-        }
-        // El identificador de un juego se pide al método getRandomId().
-        if (! getGameId ( name ).isEmpty()) 
-        {
-            return false;
-        }
-        // Es necesario un bucle que vaya generando identificadores hasta
-        // dar con uno que todavía no haya sido empleado.
-        String id2 = getRandomId();
-        while( !getGameName( id2 ).isEmpty())
-        {
-            id2 = getRandomId();
-        }
-        
-        try( final PreparedStatement preparedStatementInsert
-                = connection.prepareStatement(consulta))
-        {
-            preparedStatementInsert.setString(1, id2);
-            
-            preparedStatementInsert.setString(2, juegoEnMayusc);
-            final int filasAfectadas = preparedStatementInsert.executeUpdate();
-            return filasAfectadas > 0;
-        }
-        
-        catch( final SQLException e)
-        {
-            LOGGER.log(Level.WARNING, "Fallo para registrar un juego nuevo", e);
-            throw e;
-        }
+      return false;
     }
+    
+    final String juegoEnMayusc = name.toUpperCase();
+    final String consulta = "insert into Games (GameId, GameName) values (?, ?)";
+    // Si el juego ya está registrado, se devuelve false.
+    
+    // El identificador de un juego se pide al método getRandomId().
+    if (!getGameId(name).isEmpty())
+    {
+      return false;
+    }
+    // Es necesario un bucle que vaya generando identificadores hasta
+    // dar con uno que todavía no haya sido empleado.
+    String id2 = getRandomId();
+    while (!getGameName(id2).isEmpty())
+    {
+      id2 = getRandomId();
+    }
+
+    try (final PreparedStatement preparedStatementInsert
+                                 = connection.prepareStatement(consulta))
+    {
+      preparedStatementInsert.setString(1, id2);
+
+      preparedStatementInsert.setString(2, juegoEnMayusc);
+      final int filasAfectadas = preparedStatementInsert.executeUpdate();
+      return filasAfectadas > 0;
+    }
+
+    catch (final SQLException e)
+    {
+      LOGGER.log(Level.WARNING, "Fallo para registrar un juego nuevo", e);
+      throw e;
+    }
+  }
 
   public List<String> getGames () throws SQLException 
   {
