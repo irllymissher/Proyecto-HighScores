@@ -236,6 +236,7 @@ public final class GameRequestHandler implements HttpHandler {
   {
 
     final Games g = new Games();
+    //final Matcher validarNombreDelJuego;
 
     try
     {
@@ -255,10 +256,14 @@ public final class GameRequestHandler implements HttpHandler {
       {
         for (final String j : listaJuegos)
         {
-          w.write(j);
+          final Matcher validarNombreDelJuego = PATRON_NOMBRE_JUEGO.matcher(j);
 
-          // Un juego por linea para que el cliente pueda leerlo
-          // linea por linea
+          if (!validarNombreDelJuego.matches())
+          {
+            LOGGER.warning("El nombre del juego no es valido desde la bbdd");
+            continue;
+          }
+          w.write(j);
           w.write("\n");
         }
       }
