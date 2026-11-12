@@ -1,19 +1,27 @@
-
 package server.handler;
 /**
- * Todos los cambios estan realizados estan en mi GitHub.
+ * El desarrollo y cambios realizados durante este proyecto estan
+ * debidamente documentados en mi repo de GitHub, donde se puede
+ * consultar el historial de commmits, las decisiones tomadas y las
+ * correciones realiadas durante el proyecto. 
+ * 
+ * He intentado seguir la teoria vista en clase y los ejemplos
+ * explicados por MAZ en NetBeans, procuré mantenr un estilo
+ * coherente con lo trabajdo durante las sesiones.
+ * 
+ * En los comentarios de los metodos explico las decisiones de 
+ * implementacion más relevantes a mi parecer y los motivos por
+ * los que he decidido optar por ciertas soluciones.
+ * 
+ * Durante el desarrollo me he apoyado fuertemente en la documentacion
+ * oficial de Java con el objetivo de consultar el funcionamiento
+ * de las clases, metodos y excepciones utilizadas.
  *
- * Ahi se puede revisar el historial de decisiones y correciones que he ido
- * tomando a lo largo de este proyecto para que el servicio pudiera funcionar
- * como pide el enunciado de la practica
+ * REPO: https://github.com/irllymissher/Proyecto-HighScores.git
  *
- * He intentado ser coherente con la teoria vista en clase y con los ejemplos de
- * NetBeans que MAZ explicó, siguiente las formas estandar de programar y usar
- * los metodos que se usaron en los pertinentes lugares. En los comentarios de
- * cada metodo explico el porqué de cada decisión.
- *
- *
- * Fuentes internas:
+ * ------------------
+ * Fuentes internas: 
+ * ------------------
  * - Enunciado:
  *    p.3 (POST /score y GET /score con query)
  *    p.4 (lectura y validacion del cuerpo)
@@ -25,7 +33,9 @@ package server.handler;
  *    p.7 (charset explicito)
  *  - SortingHandler (proyecto SortingService): estructura en 3 bloques
  *
+ * ------------------
  * Fuentes externas:
+ * ------------------
  *   - HttpHandler: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
  */
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
