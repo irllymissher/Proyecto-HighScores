@@ -27,7 +27,7 @@ package server.handler;
 /**
  *
  * @author MAZ
- */ 
+ */
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
 import com.sun.net.httpserver.HttpExchange;
@@ -60,24 +60,30 @@ public final class GameRequestHandler implements HttpHandler {
   static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 
   static private final int NO_CONTENT = -1;
-  
+
   // Debe de ser de tipo Pattern para usar matcher() a diferencia de String que usa next(String)
   static private final Pattern PATRON_NOMBRE_JUEGO = Pattern.compile("[a-zA-Z0-9 -]{1,127}");
 
   @Override
-  public void handle(final HttpExchange exchange) throws IOException {
+  public void handle (final HttpExchange exchange) throws IOException
+  {
 
     final String requestMethodName = exchange.getRequestMethod();
 
-    if ("PUT".compareTo(requestMethodName) == 0) {
+    if ("PUT".compareTo(requestMethodName) == 0)
+    {
       LOGGER.info("PUT recibido");
       // Inserción de nuevo juego
       handlePutRequest(exchange);
-    } else if ("GET".compareTo(requestMethodName) == 0) {
+    }
+    else if ("GET".compareTo(requestMethodName) == 0)
+    {
       LOGGER.info("GET recibido");
       // Consulta de juegos
       handleGetRequest(exchange);
-    } else {
+    }
+    else
+    {
       // Servicio no atiende otros tipos de requests.
       exchange.sendResponseHeaders(HTTP_BAD_REQUEST, NO_CONTENT);
     }
@@ -92,12 +98,9 @@ public final class GameRequestHandler implements HttpHandler {
    * ya existia, si la peticion no es la correcta o algo inesperado y sin cuerpo
    * responde un 204
    *
-   * Fuentes consultas internas: 
-   *  - Enunciado: 
-   *    p.2-3 (formato y writeBoolean) 
-   *    p.4 (Scanner, next(pattern), NFKC, NoSuchElementExcepction, nombre de juegos
-   *    con espacios) 
-   *    p.7-8 (el 204)
+   * Fuentes consultas internas: - Enunciado: p.2-3 (formato y writeBoolean) p.4
+   * (Scanner, next(pattern), NFKC, NoSuchElementExcepction, nombre de juegos
+   * con espacios) p.7-8 (el 204)
    *
    * Fuente externas: - HttpHandler:
    * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
@@ -123,7 +126,7 @@ public final class GameRequestHandler implements HttpHandler {
     final Games g = new Games();
     final boolean resultadoDeAlta;
     final Matcher validarNombrePatron;
-    
+
     try ( Scanner bodyScanner
                   = new Scanner(
                     exchange.getRequestBody(),
@@ -151,23 +154,22 @@ public final class GameRequestHandler implements HttpHandler {
         //los juegos pueden llegar espacio
         nombreAntesDeTrim = lineScanner.nextLine();
         nombreDespuesDeTRim = nombreAntesDeTrim.trim();
-        
+
         // Saltaba un error porque no encontraba matcher, pero despues de leer
         // la documentacion habia que ponerle de tipo Pattern y NO String
         validarNombrePatron = PATRON_NOMBRE_JUEGO.matcher(nombreDespuesDeTRim);
-        
+
         if (!validarNombrePatron.matches())
         {
           throw new NoSuchElementException("El nombre del juego no cumple el estandar requerido");
         }
-        
-        
+
         /* YA NO SE EJECUTA PORQUE MATCHES CUBRE ESTA PARTE Y LANZA EXCEPCION
         if (nombreDespuesDeTRim.isEmpty())
         {
           throw new NoSuchElementException("Nombre de juego vacio tras limpiar espacios");
         }
-        */
+         */
         // Games se encarga de ponerlo en mayusculas
         resultadoDeAlta = g.newGame(nombreDespuesDeTRim);
       }
@@ -223,14 +225,11 @@ public final class GameRequestHandler implements HttpHandler {
    * Un juego por cada linea. Si la base de datos falla, por lo que sea, recibe
    * un 204 sin cuerpo
    *
-   * Fuentes consultas internas: 
-   *  - Enunciado: 
-   *    p.2-3 (formato) 
-   *    p.5 (si son varias lineas, con OutPutStreamWrite) 
-   *    p.7-8 (el 204)
+   * Fuentes consultas internas: - Enunciado: p.2-3 (formato) p.5 (si son varias
+   * lineas, con OutPutStreamWrite) p.7-8 (el 204)
    *
    * Fuentes consultas externas: - OutputStreamWriter:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html 
+   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
    */
   private void handleGetRequest (final HttpExchange exchange)
   {
@@ -285,7 +284,7 @@ public final class GameRequestHandler implements HttpHandler {
    *
    * He realizado este metodo porque sendRespondeHeader lanza un excepcion de IO
    * y, para todo aquello que se repite, he simplifcado y creado este mtodo en
-   * vez de repetir el try-catch en cada sitio 
+   * vez de repetir el try-catch en cada sitio
    */
   private void responderSinContenido (final HttpExchange exchange)
   {
@@ -303,14 +302,11 @@ public final class GameRequestHandler implements HttpHandler {
   }
 
   /**
-   * Apunta en el registro log lo que ha pasado y cual fue la peticion 
-   *  - quien la manda 
-   *  - con que metodo fue mandada 
-   *  - a que ruta
+   * Apunta en el registro log lo que ha pasado y cual fue la peticion - quien
+   * la manda - con que metodo fue mandada - a que ruta
    *
-   * Fuente consultada interna: 
-   *  - Enunciado: 
-   *    p.7 (la firma viene de ahí, y el registro de excepciones va en este nivel) 
+   * Fuente consultada interna: - Enunciado: p.7 (la firma viene de ahí, y el
+   * registro de excepciones va en este nivel)
    */
   private void logging (
           final Level level,

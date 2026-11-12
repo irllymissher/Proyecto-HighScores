@@ -1,4 +1,5 @@
 package server.db;
+
 /**
  *
  * @author MAZ
@@ -25,12 +26,14 @@ public final class Games {
   private final Connection connection;
   private final SecureRandom rg;
 
-  public Games () {
+  public Games ()
+  {
     this.connection = DBComponent.getConnection();
     this.rg = DBComponent.getRandomGenerator();
   }
 
-  private String getRandomId () {
+  private String getRandomId ()
+  {
 
     // Generación de secuencia aleatoria
     final byte[] rawId = new byte[ID_BYTE_LENGTH];
@@ -46,11 +49,11 @@ public final class Games {
     {
       return false;
     }
-    
+
     final String juegoEnMayusc = name.toUpperCase();
     final String consulta = "insert into Games (GameId, GameName) values (?, ?)";
     // Si el juego ya está registrado, se devuelve false.
-    
+
     // El identificador de un juego se pide al método getRandomId().
     if (!getGameId(name).isEmpty())
     {
@@ -81,97 +84,97 @@ public final class Games {
     }
   }
 
-  public List<String> getGames () throws SQLException 
+  public List<String> getGames () throws SQLException
   {
     final List<String> games = new ArrayList<>();
     // TODO
     final String consulta = "select GameName from Games";
-    try (final PreparedStatement preparedStatementJuegos = 
-            connection.prepareStatement(consulta)) 
+    try (final PreparedStatement preparedStatementJuegos
+                                 = connection.prepareStatement(consulta))
     {
-        
-      try (final ResultSet resultadoConsulta = preparedStatementJuegos.executeQuery()) {
-        while (resultadoConsulta.next()) 
+
+      try (final ResultSet resultadoConsulta = preparedStatementJuegos.executeQuery())
+      {
+        while (resultadoConsulta.next())
         {
           games.add(resultadoConsulta.getString("GameName"));
         }
       }
     }
-    catch (final SQLException e) 
-      {
-          LOGGER.log(Level.WARNING, "Fallo al listar los juegos", e);
-          throw e;
-      }
+    catch (final SQLException e)
+    {
+      LOGGER.log(Level.WARNING, "Fallo al listar los juegos", e);
+      throw e;
+    }
     return games;
   }
 
-  String getGameId (final String name) throws SQLException {
-    if (name == null) 
+  String getGameId (final String name) throws SQLException
+  {
+    if (name == null)
     {
-        return "";
+      return "";
     }
     final String juegoEnMayusculas = name.toUpperCase();
     final String consultaJuego = "select GameId from Games where GameName=?";
-    
-    try(final PreparedStatement preparedStatementJuegoEnMayusculas = 
-            connection.prepareStatement(consultaJuego))
+
+    try (final PreparedStatement preparedStatementJuegoEnMayusculas
+                                 = connection.prepareStatement(consultaJuego))
     {
-        
-        preparedStatementJuegoEnMayusculas.setString(1, juegoEnMayusculas);
-        try(final ResultSet resultadoConsulta = preparedStatementJuegoEnMayusculas.executeQuery())
+
+      preparedStatementJuegoEnMayusculas.setString(1, juegoEnMayusculas);
+      try (final ResultSet resultadoConsulta = preparedStatementJuegoEnMayusculas.executeQuery())
+      {
+        if (resultadoConsulta.next())
         {
-            if (resultadoConsulta.next())
-            {
-                return resultadoConsulta.getString("GameId");
-             
-                        
-            }
-            else
-            {
-                return "";
-            }
+          return resultadoConsulta.getString("GameId");
+
         }
+        else
+        {
+          return "";
+        }
+      }
     }
     catch (final SQLException e)
-        {
-            LOGGER.log(Level.WARNING, "Fallo al buscar el id del juego", e);
-            throw e;
-        }
-    
+    {
+      LOGGER.log(Level.WARNING, "Fallo al buscar el id del juego", e);
+      throw e;
+    }
+
   }
 
   String getGameName (final String gameId) throws SQLException
   {
-      if (gameId == null) 
+    if (gameId == null)
     {
-        return "";
+      return "";
     }
     final String consultaNombreJuego = "select GameName from Games where GameId=?";
-    
-    try(final PreparedStatement preparedStatementNombreJuego = 
-            connection.prepareStatement(consultaNombreJuego))
+
+    try (final PreparedStatement preparedStatementNombreJuego
+                                 = connection.prepareStatement(consultaNombreJuego))
     {
-        
-        preparedStatementNombreJuego.setString(1, gameId);
-        try(final ResultSet resultadoConsulta = preparedStatementNombreJuego.executeQuery())
+
+      preparedStatementNombreJuego.setString(1, gameId);
+      try (final ResultSet resultadoConsulta = preparedStatementNombreJuego.executeQuery())
+      {
+        if (resultadoConsulta.next())
         {
-            if (resultadoConsulta.next())
-            {
-                return resultadoConsulta.getString("GameName");
-             
-                        
-            }
-            else
-            {
-                return "";
-            }
+          return resultadoConsulta.getString("GameName");
+
         }
+        else
+        {
+          return "";
+        }
+      }
     }
     catch (final SQLException e)
-        {
-            LOGGER.log(Level.WARNING, "Fallo al buscar el nombre del juego", e);
-            throw e;
-        }
+    {
+      LOGGER.log(Level.WARNING, "Fallo al buscar el nombre del juego", e);
+      throw e;
+    }
   }
 
 }

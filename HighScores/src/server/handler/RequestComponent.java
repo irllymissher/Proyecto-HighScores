@@ -37,31 +37,39 @@ public final class RequestComponent {
   //////////////////////////////////////////////////////
   // Método que arranca infraestructura de componente //
   //////////////////////////////////////////////////////
-  static public void start() throws Exception {
+  static public void start () throws Exception
+  {
     start(SERVER_PORT, MIN_NUM_THREADS);
   }
 
   //////////////////////////////////////////////////////
   // Método que arranca infraestructura de componente //
   //////////////////////////////////////////////////////
-  static public void start(final int port, final int nthreads) throws Exception {
+  static public void start (final int port, final int nthreads) throws Exception
+  {
 
     // 
-    if (COMPONENT != null) {
+    if (COMPONENT != null)
+    {
       return;
     }
 
-    if (nthreads <= 0) {
+    if (nthreads <= 0)
+    {
       throw new IllegalArgumentException("Número de hebras debe ser positivo");
-    } else if (nthreads > MAX_NUM_THREADS) {
+    }
+    else if (nthreads > MAX_NUM_THREADS)
+    {
       throw new IllegalArgumentException("Número de hebras no debe ser mayor que " + MAX_NUM_THREADS);
     }
 
     // Instancición de singleton
     final Object lock = new Object();
-    synchronized (lock) {
+    synchronized (lock)
+    {
 
-      if (COMPONENT == null) {
+      if (COMPONENT == null)
+      {
         COMPONENT = new RequestComponent(port, nthreads);
       }
 
@@ -72,8 +80,10 @@ public final class RequestComponent {
   //////////////////////////////////////////////////////
   // Método que detiene infraestructura de componente //
   //////////////////////////////////////////////////////
-  static public void stop() {
-    if (COMPONENT == null) {
+  static public void stop ()
+  {
+    if (COMPONENT == null)
+    {
       return;
     }
     COMPONENT.httpServer.stop(0);
@@ -83,11 +93,15 @@ public final class RequestComponent {
     // Evita que el proceso activador de la infraestructura finalice antes
     // de que se hayan atendido todas las tareas aceptadas.
     boolean isTerminated;
-    do {
-      try {
+    do
+    {
+      try
+      {
         // Consulta cada segundo si todavía quedan tareas activas.
         isTerminated = executor.awaitTermination(1000, MILLISECONDS);
-      } catch (final InterruptedException ex) {
+      }
+      catch (final InterruptedException ex)
+      {
         LOGGER.log(Level.SEVERE, "{0}", ex);
         return;
       }
@@ -98,11 +112,13 @@ public final class RequestComponent {
   }
 
   // Constructor privado
-  private RequestComponent(final int port, final int nthreads) throws IOException {
-    try {
+  private RequestComponent (final int port, final int nthreads) throws IOException
+  {
+    try
+    {
       // Arranque del servicio de escucha.
       final InetSocketAddress hostAddress
-          = new InetSocketAddress(InetAddress.getLocalHost(), port);
+                              = new InetSocketAddress(InetAddress.getLocalHost(), port);
       this.httpServer = HttpServer.create(hostAddress, 0);
       // Servicio ejecutor con hebras de trabajo
       final ExecutorService executor = Executors.newFixedThreadPool(nthreads);
@@ -114,7 +130,9 @@ public final class RequestComponent {
       // Una vez configurado el servidor HTTP, se arranca.
       httpServer.start();
       LOGGER.log(Level.INFO, "servidor HTTP activo por puerto {0}", String.valueOf(SERVER_PORT));
-    } catch (final IOException ex) {
+    }
+    catch (final IOException ex)
+    {
       LOGGER.log(Level.SEVERE, "no se ha podido arrancar el servicio", ex);
       throw ex;
     }
