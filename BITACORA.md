@@ -147,3 +147,31 @@
   otras partes del codigo, escritas por el profesor, decidí no tocarla si no mas bien
   hacer comprobaciones pertinentens a lo escrito
   - isEmpty() queda comentado porque el patron ya rechaza el nombre vacio
+
+# 2026-11-12 (linux)
+- Hecho:
+  - Arranque el servidor realizando distintas pruebas de funcionamiento
+  - Probe nombres que podria aceptar y rechar con un 204
+  - Realice pruebas en terminal lanzando curls con peticiones que el cliente no dejaria mandar
+    /score sin consulta, abc, 11 digitos
+- Fallos/Descubrimientos:
+  - El servidor escuchaba un puerto en concreto y no en localhost
+  - probando digitos vi que con 11 digitos se caiga, no es que pueda solucionarlo
+  porque es codigo del profesor 
+- Dudas/Decisiones:
+  - Hay que validad lo que sale de la BD, incluidas las filas metidas a mano
+
+# 2026-11-12 (casa)
+- Hecho
+  - revise el codgo de games y cambie una comprobacion de toUpperCase
+  - quitado los comentarios //todo
+  - renomnbrado de variables y comentarios de acorde a Clean Code y docuemntracion
+  oficial de Java
+- Fallos:
+  - Metí, sin darme cuenta, el bucle comprobacion en el PUT en vez de GET
+  - patron cruzado en getGamesScore como el pasado 11 de noviembre
+  - me di cuenta que isEmpty no evita que haya un nullpointerexception porque tambien
+  es un metodo
+- Dudas/Decisiones:
+  - valiod nombres, no puntuaciones por ser integer
+  - sin @param para los javadoc porque no se que ponerles
