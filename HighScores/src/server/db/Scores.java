@@ -122,13 +122,16 @@ public final class Scores {
   public Map<String, Integer> getPlayerScores (final String playername)
           throws SQLException
   {
-
+     
     final Map<String, Integer> scores = new LinkedHashMap<>();
-    final String idJugador = p.getPlayerId(playername);
+    
     if (playername == null)
     {
       return scores;
     }
+    
+    final String idJugador = p.getPlayerId(playername);
+    
     if (idJugador.isEmpty())
     {
       return scores;
