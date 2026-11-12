@@ -27,8 +27,6 @@ package server.handler;
  *
  * Fuentes externas:
  *   - HttpHandler: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
- * 
- * @author MAZ
  */
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -125,8 +123,8 @@ public final class ScoreRequestHandler implements HttpHandler {
    *    p.3 (cuerpo de tres líneas: playername, gamename, score)  
    *    p.4 (Scanner, next(pattern), NFKC, NoSuchElementException obligatoria, nombre
    *        de jugador sin espacios y de juego con espacios, puntuacion de hasta 10
-   *        digitos, positiva y convertida con Integer.parseInt) p.7 (204 si no pasa la
-   *        validacion)  
+   *        digitos, positiva y convertida con Integer.parseInt) 
+   *    p.7 (204 si no pasa la validacion)  
    *    p.8 (204 si hay error interno) - Tema 2b: p.2 (rechazar, no
    *        arreglar) p.4 (expresiones regulares sin comodines, conversiOn de tipos con
    *        manejo estricto de excepciones) p.6 (NFKC) p.7 (charset) 
