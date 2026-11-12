@@ -54,6 +54,8 @@ import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //
 import server.db.Players;
@@ -72,6 +74,7 @@ public final class PlayerRequestHandler implements HttpHandler {
   // Exluyo el uso de la barra inicial `/`
   // Permito que, por lo menos, exista una letra en cualquier posicion
   static private final String PATRON_DEL_NOMBRE_DEL_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
+  static private final Pattern PATRON_DEL_NOMBRE_DEL_JUGADOR_2 = Pattern.compile("(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}");
 
   @Override
   public void handle(final HttpExchange exchange) throws IOException {
@@ -270,6 +273,14 @@ public final class PlayerRequestHandler implements HttpHandler {
       {
         for (final String j : listaDeJugadores)
         {
+          final Matcher validarNombreDElJugador;
+          validarNombreDElJugador = PATRON_DEL_NOMBRE_DEL_JUGADOR_2.matcher(j);
+          if (!validarNombreDElJugador.matches())
+          {
+            LOGGER.warning("el nombre del jugador no es valido (bbdd)");
+            continue;
+          }
+          
           w.write(j);
           w.write("\n");
         }
