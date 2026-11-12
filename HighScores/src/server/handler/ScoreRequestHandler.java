@@ -434,6 +434,13 @@ public final class ScoreRequestHandler implements HttpHandler {
       {
         for (final Map.Entry<String, Integer> entrada : listaPuntuaciones.entrySet())
         {
+          final Matcher validarNombreDelJuego;
+          validarNombreDelJuego = PATRON_DEL_NOMBRE_DEL_JUEGO.matcher(entrada.getKey());
+          if (!validarNombreDelJuego.matches())
+          {
+            LOGGER.warning("El nombre del juego no es valido desde la bbdd");
+            continue;
+          }
           w.write("gamename : ");
           w.write(entrada.getKey());
           w.write("\n");
@@ -530,6 +537,14 @@ public final class ScoreRequestHandler implements HttpHandler {
       {
         for (final Map.Entry<String, Integer> entrada : listaPuntuaciones.entrySet())
         {
+          final Matcher validarNombreDelJugador;
+          validarNombreDelJugador = PATRON_DEL_NOMBRE_DEL_JUGADOR_2.matcher(entrada.getKey());
+          if (!validarNombreDelJugador.matches())
+          {
+            LOGGER.warning("El nombre del jugador no es valido desde la bbdd");
+            continue;
+          }
+          
           w.write("playername : ");
           w.write(entrada.getKey());
           w.write("\n");
