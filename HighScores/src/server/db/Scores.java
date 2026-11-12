@@ -125,8 +125,6 @@ public final class Scores {
 
     final Map<String, Integer> scores = new LinkedHashMap<>();
     final String idJugador = p.getPlayerId(playername);
-
-    // TODO
     if (playername == null)
     {
       return scores;

@@ -86,8 +86,7 @@ public final class Games {
 
   public List<String> getGames () throws SQLException
   {
-    final List<String> games = new ArrayList<>();
-    // TODO
+    final List<String> games = new ArrayList<>(); 
     final String consulta = "select GameName from Games";
     try (final PreparedStatement preparedStatementJuegos
                                  = connection.prepareStatement(consulta))

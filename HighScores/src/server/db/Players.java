@@ -105,9 +105,7 @@ public final class Players {
 
   public List<String> getPlayers () throws SQLException
   {
-    final List<String> players = new ArrayList<>();
-
-    // TODO
+    final List<String> players = new ArrayList<>(); 
     final String consultarJugadoresSQL = "select PlayerName from Players";
     try (final PreparedStatement preparedStatementJugadores = connection.prepareStatement(consultarJugadoresSQL))
     {
