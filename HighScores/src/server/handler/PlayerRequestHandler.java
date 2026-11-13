@@ -73,8 +73,8 @@ public final class PlayerRequestHandler implements HttpHandler {
   // Permito una longitud de 1 a 63
   // Exluyo el uso de la barra inicial `/`
   // Permito que, por lo menos, exista una letra en cualquier posicion
-  static private final String PATRON_DEL_NOMBRE_DEL_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
-  static private final Pattern PATRON_DEL_NOMBRE_DEL_JUGADOR_2 = Pattern.compile("(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}");
+  static private final String REGEX_NOMBRE_JUGADOR = "(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}";
+  static private final Pattern PATRON_NOMBRE_JUGADOR = Pattern.compile("(?!/)(?=[a-zA-Z0-9_@/-]*[a-zA-Z])[a-zA-Z0-9_@/-]{1,63}");
 
   @Override
   public void handle (final HttpExchange exchange) throws IOException
@@ -137,7 +137,7 @@ public final class PlayerRequestHandler implements HttpHandler {
    */
   private void handlePutRequest (final HttpExchange exchange)
   {
-    final Players p = new Players();
+    final Players jugadores = new Players();
     final boolean resultadoDeAlta;
 
     try ( Scanner bodyScanner
@@ -157,11 +157,11 @@ public final class PlayerRequestHandler implements HttpHandler {
 
         lineScanner.next("playername");
         lineScanner.next(":");
-        final String nombre;
+        final String nombreJugador;
 
         // Obtengo el nombre del jugador de la peticion
         // Validamos este token mediante la REGEX de lo permitido
-        nombre = lineScanner.next(PATRON_DEL_NOMBRE_DEL_JUGADOR);
+        nombreJugador = lineScanner.next(REGEX_NOMBRE_JUGADOR);
 
         // Cualquier cosa que no sea acerca del jugador
         // la voy a rechazar
@@ -169,7 +169,7 @@ public final class PlayerRequestHandler implements HttpHandler {
         {
           throw new NoSuchElementException("Residuo");
         }
-        resultadoDeAlta = p.newPlayer(nombre);
+        resultadoDeAlta = jugadores.newPlayer(nombreJugador);
       }
     }
     catch (final NoSuchElementException e)
@@ -254,26 +254,26 @@ public final class PlayerRequestHandler implements HttpHandler {
    */
   private void handleGetRequest (final HttpExchange exchange)
   {
-    final Players p = new Players();
+    final Players jugadores = new Players();
     try
     {
-      final List<String> listaDeJugadores = p.getPlayers();
+      final List<String> listaDeJugadores = jugadores.getPlayers();
       exchange.sendResponseHeaders(HTTP_OK, 0);
       try (
               final OutputStream os = exchange.getResponseBody(); final Writer w = new OutputStreamWriter(
               os, StandardCharsets.UTF_8))
       {
-        for (final String j : listaDeJugadores)
+        for (final String jugador : listaDeJugadores)
         {
-          final Matcher validarNombreDElJugador;
-          validarNombreDElJugador = PATRON_DEL_NOMBRE_DEL_JUGADOR_2.matcher(j);
-          if (!validarNombreDElJugador.matches())
+          final Matcher comprobacionNombreJugador;
+          comprobacionNombreJugador = PATRON_NOMBRE_JUGADOR.matcher(jugador);
+          if (!comprobacionNombreJugador.matches())
           {
             LOGGER.warning("el nombre del jugador no es valido (bbdd)");
             continue;
           }
 
-          w.write(j);
+          w.write(jugador);
           w.write("\n");
         }
       }
