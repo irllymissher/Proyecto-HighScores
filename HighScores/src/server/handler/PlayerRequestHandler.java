@@ -344,16 +344,16 @@ public final class PlayerRequestHandler implements HttpHandler {
    * -----------------
    * Fuentes externas:
    * -----------------
-   * - Logger:
-   *                https://stackoverflow.com
-   *                https://stackoverflow.com
-   *                https://oracle.com
-   *
-   * - HttpExchange:
-   *                https://oracle.com
-   *
-   * - URI:
-   *                https://oracle.com
+   * Logger:
+   *                https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
+   *                https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.logging/java/util/logging/Logger.html
+   * 
+   * HttpExchange (getRemoteAddress, getRequestMethod, getRequestURI):              
+   *                https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html
+   *                
+   * URI
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
    */
   private void logging (
           final Level level,

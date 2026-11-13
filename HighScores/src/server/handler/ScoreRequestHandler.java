@@ -646,6 +646,9 @@ public final class ScoreRequestHandler implements HttpHandler {
    * - Enunciado:
    *    p.7 (firma del metodo y nivel WARNING para el registro de excepciones)
    *
+   * -----------------
+   * Fuentes externas:
+   * -----------------
    * Logger:
    *                https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
    *                https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message

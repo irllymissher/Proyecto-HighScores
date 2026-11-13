@@ -311,8 +311,25 @@ public final class GameRequestHandler implements HttpHandler {
    * Apunta en el registro log lo que ha pasado y cual fue la peticion - quien
    * la manda - con que metodo fue mandada - a que ruta
    *
-   * Fuente consultada interna: - Enunciado: p.7 (la firma viene de ahí, y el
-   * registro de excepciones va en este nivel)
+   * ------------------
+   * Fuentes internas:
+   * ------------------
+   * - Enunciado:
+   *    p.7 (la firma viene de ahi, y el registro de excepciones va en este nivel)
+   * 
+   * -----------------
+   * Fuentes externas:
+   * -----------------
+   * Logger:
+   *                https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
+   *                https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.logging/java/util/logging/Logger.html
+   * 
+   * HttpExchange (getRemoteAddress, getRequestMethod, getRequestURI):              
+   *                https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html
+   *                
+   * URI
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
    */
   private void logging (
           final Level level,
