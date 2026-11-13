@@ -6,27 +6,34 @@
  * como pide el enunciado de la practica
  *
  * He intentado ser coherente con la teoria vista en clase y con los ejemplos de
- * NetBeans que MAZ explicó, siguiente las formas estandar de programar y usar
+ * NetBeans que MAZ explico, siguiente las formas estandar de programar y usar
  * los metodos que se usaron en los pertinentes lugares. En los comentarios de
- * cada metodo explico el porqué de cada decisión.
+ * cada metodo explico el porque de cada decision.
  *
+ * REPO: https://github.com
  *
+ * ------------------
  * Fuentes internas:
+ * ------------------
  *  - Enunciado:
  *    p.4 (lectura del cuerpo)
  *    p.7 (registro y excepciones)
- *    p.8 (códigos de respuesta)
+ *    p.8 (codigos de respuesta)
  *  - Tema 2b:
- *    p.2 (rechazar entradas inválidas)
+ *    p.2 (rechazar entradas invalidas)
  *    p.6 (NFKC)
- *    p.7 (charset explícito)
+ *    p.7 (charset explicito)
  *    p.4 (sin comodines, porque no van ^ y $)
  *  - SortingHandler (proyecto SortingService): estructura en 3 bloques
  *
+ * ------------------
  * Fuentes externas:
- *   - HttpHandler: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
- *   - Pattern: https://sppcontests.org/lang_docs/jdk-11.0.24_doc-all/docs/api/java.base/java/util/regex/Pattern.html
- *              https://javadoc.scijava.org/Java11/java.base/java/util/regex/class-use/Pattern.html
+ * ------------------
+ *   - HttpHandler: 
+ *          https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
+ *   - Pattern:  
+ *          https://sppcontests.org/lang_docs/jdk-11.0.24_doc-all/docs/api/java.base/java/util/regex/Pattern.html 
+ *          https://javadoc.scijava.org/Java11/java.base/java/util/regex/class-use/Pattern.html
  */
 package server.handler;
 
@@ -116,24 +123,40 @@ public final class PlayerRequestHandler implements HttpHandler {
    * de los datos que se reciben son los esperados y realiza el alta del jugador
    * en la base de datos
    *
-   * Fuentes internas: - Enunciado: p.2 (formato para playername y respuesta con
-   * writeBoolean) p.4 (Scanner, next(pattern), NFKC, NoSuchElementException,
-   * nombre de jugador sin espacios) p.7 (204 si no pasa la validacion) p.8 (204
-   * si hay error interno) - Tema 2b: p.2 (rechazar, no arreglar) p.6 (NFKC) p.7
-   * (charset) - SortingHandler: sendResponseHeaders(HTTP_OK, 0)
+   * ------------------
+   * Fuentes internas:
+   * ------------------
+   * - Enunciado:
+   *    p.2 (formato para playername y respuesta con writeBoolean)
+   *    p.4 (Scanner, next(pattern), NFKC, NoSuchElementException, nombre de jugador sin espacios)
+   *    p.7 (204 si no pasa la validacion)
+   *    p.8 (204 si hay error interno)
+   * - Tema 2b:
+   *    p.2 (rechazar, no arreglar)
+   *    p.6 (NFKC)
+   *    p.7 (charset)
+   * - SortingHandler: sendResponseHeaders(HTTP_OK, 0)
    *
-   * Fuentes externas: - HttpExchange (getRequestBody, sendResponseHeaders,
-   * getResponseBody):
-   * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
+   * -----------------
+   * Fuentes externas:
+   * -----------------
+   * - HttpExchange (getRequestBody, sendResponseHeaders, getResponseBody):
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
+   *
    * - Scanner (next(String), hasNext()):
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Scanner.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Scanner.html
+   *
    * - NoSuchElementException:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/NoSuchElementException.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/NoSuchElementException.html
+   *
    * - Normalizer:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
-   * - Unicode TR15 (formas de normalización):
-   * https://www.unicode.org/reports/tr15 - DataOutputStream (writeBoolean):
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/DataOutputStream.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
+   *
+   * - Unicode TR15 (formas de normalizacion):
+   *                https://www.unicode.org/reports/tr15
+   *
+   * - DataOutputStream (writeBoolean):
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/DataOutputStream.html
    */
   private void handlePutRequest (final HttpExchange exchange)
   {
@@ -241,16 +264,27 @@ public final class PlayerRequestHandler implements HttpHandler {
    * Obtengo la lista antes de enviar 200, si ocurre algun fallo entonces envio
    * 204
    *
-   * Fuentes internas: - Enunciado: p.2 (GET /player: cuerpo vacío, un nombre
-   * por línea) p.5 (respuesta de varias líneas con OutputStreamWriter) p.8 (204
-   * si hay error interno) - Tema 2b: p.7 (charset explícito)
+   * ------------------
+   * Fuentes internas:
+   * ------------------
+   * - Enunciado:
+   *    p.2 (GET /player: cuerpo vacio, un nombre por linea)
+   *    p.5 (respuesta de varias lineas con OutputStreamWriter)
+   *    p.8 (204 si hay error interno)
+   * - Tema 2b:
+   *    p.7 (charset explicito)
    *
-   * Fuentes externas: - OutputStreamWriter:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
+   * -----------------
+   * Fuentes externas:
+   * -----------------
+   * - OutputStreamWriter:
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
+   *
    * - StandardCharsets:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/StandardCharsets.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/StandardCharsets.html
+   *
    * - HttpExchange (sendResponseHeaders, getResponseBody):
-   * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
    */
   private void handleGetRequest (final HttpExchange exchange)
   {
@@ -301,13 +335,25 @@ public final class PlayerRequestHandler implements HttpHandler {
    * Apunta en el registro log lo que ha pasado y cual fue la peticion - quien
    * la manda - con que metodo fue mandada - a que ruta
    *
-   * Fuente consultada interna: - Enunciado: p.7 (la firma viene de ahí, y el
-   * registro de excepciones va en este nivel) - Fuentes externas:
-   * https://stackoverflow.com/questions/5950557/good-examples-using-java-util-logging
-   * https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html
-   * https://stackoverflow.com/questions/7036765/how-to-i-format-my-log-message
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URI.html
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.logging/java/util/logging/Logger.html
+   * ------------------
+   * Fuentes internas:
+   * ------------------
+   * - Enunciado:
+   *    p.7 (la firma viene de ahi, y el registro de excepciones va en este nivel)
+   * 
+   * -----------------
+   * Fuentes externas:
+   * -----------------
+   * - Logger:
+   *                https://stackoverflow.com
+   *                https://stackoverflow.com
+   *                https://oracle.com
+   *
+   * - HttpExchange:
+   *                https://oracle.com
+   *
+   * - URI:
+   *                https://oracle.com
    */
   private void logging (
           final Level level,
