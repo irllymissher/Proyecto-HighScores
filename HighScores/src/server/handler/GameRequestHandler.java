@@ -11,7 +11,9 @@
  * cada metodo explico el porqué de cada decisión.
  *
  *
- * Fuentes consultas internas:
+ * ------------------
+ * Fuentes internas:
+ * ------------------
  *    - Enunciado:
  *        p.4 (como leer el cuerpo)
  *        p.7 (registro y excepciones)
@@ -24,10 +26,6 @@
  */
 package server.handler;
 
-/**
- *
- * @author MAZ
- */
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
 import com.sun.net.httpserver.HttpExchange;
@@ -98,34 +96,41 @@ public final class GameRequestHandler implements HttpHandler {
    * ya existia, si la peticion no es la correcta o algo inesperado y sin cuerpo
    * responde un 204
    *
-   * Fuentes consultas internas: - Enunciado: p.2-3 (formato y writeBoolean) p.4
-   * (Scanner, next(pattern), NFKC, NoSuchElementExcepction, nombre de juegos
-   * con espacios) p.7-8 (el 204)
+   * ------------------
+   * Fuentes internas:
+   * ------------------
+   * - Enunciado:
+   *    p.2-3 (formato y writeBoolean)
+   *    p.4 (Scanner, next(pattern), NFKC, NoSuchElementExcepction, nombre de juegos con espacios)
+   *    p.7-8 (el 204)
    *
-   * Fuente externas: - HttpHandler:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
+   * -----------------
+   * Fuentes externas:
+   * -----------------
+   * - HttpHandler:
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpHandler.html
    *
    * - HttpExchange.getRequestBody:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpExchange.html
    *
    * - Scanner: next(String) y nextLine():
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Scanner.html
-   * https://codegym.cc/groups/posts/scanner-nextline-method-in-java
-   * https://docs.oracle.com/javase/tutorial/essential/io/scanning.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Scanner.html
+   *                https://codegym.cc/groups/posts/scanner-nextline-method-in-java
+   *                https://docs.oracle.com/javase/tutorial/essential/io/scanning.html
    *
-   * - Normalizer
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
+   * - Normalizer:
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/Normalizer.html
    *
    * - DataOutputStream:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/DataOutputStream.html
-   * https://www.tutorialspoint.com/java/io/dataoutputstream_writeboolean.html
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/DataOutputStream.html
+   *                https://www.tutorialspoint.com/java/io/dataoutputstream_writeboolean.html
    */
   private void handlePutRequest (final HttpExchange exchange)
   {
 
-    final Games g = new Games();
+    final Games juegos = new Games();
     final boolean resultadoDeAlta;
-    final Matcher validarNombrePatron;
+    final Matcher comprobacionNombreJuego;
 
     try ( Scanner bodyScanner
                   = new Scanner(
@@ -157,21 +162,14 @@ public final class GameRequestHandler implements HttpHandler {
 
         // Saltaba un error porque no encontraba matcher, pero despues de leer
         // la documentacion habia que ponerle de tipo Pattern y NO String
-        validarNombrePatron = PATRON_NOMBRE_JUEGO.matcher(nombreDespuesDeTRim);
+        comprobacionNombreJuego = PATRON_NOMBRE_JUEGO.matcher(nombreDespuesDeTRim);
 
-        if (!validarNombrePatron.matches())
+        if (!comprobacionNombreJuego.matches())
         {
           throw new NoSuchElementException("El nombre del juego no cumple el estandar requerido");
         }
 
-        /* YA NO SE EJECUTA PORQUE MATCHES CUBRE ESTA PARTE Y LANZA EXCEPCION
-        if (nombreDespuesDeTRim.isEmpty())
-        {
-          throw new NoSuchElementException("Nombre de juego vacio tras limpiar espacios");
-        }
-         */
-        // Games se encarga de ponerlo en mayusculas
-        resultadoDeAlta = g.newGame(nombreDespuesDeTRim);
+        resultadoDeAlta = juegos.newGame(nombreDespuesDeTRim);
       }
 
       // La peticion no pasa el filtro: 204 sin cuerpo y continuamos
@@ -225,16 +223,24 @@ public final class GameRequestHandler implements HttpHandler {
    * Un juego por cada linea. Si la base de datos falla, por lo que sea, recibe
    * un 204 sin cuerpo
    *
-   * Fuentes consultas internas: - Enunciado: p.2-3 (formato) p.5 (si son varias
-   * lineas, con OutPutStreamWrite) p.7-8 (el 204)
+   * ------------------
+   * Fuentes internas:
+   * ------------------
+   * - Enunciado:
+   *    p.2-3 (formato)
+   *    p.5 (si son varias lineas, con OutPutStreamWrite)
+   *    p.7-8 (el 204)
    *
-   * Fuentes consultas externas: - OutputStreamWriter:
-   * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
+   * -----------------
+   * Fuentes externas:
+   * -----------------
+   * - OutputStreamWriter:
+   *                https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/OutputStreamWriter.html
    */
   private void handleGetRequest (final HttpExchange exchange)
   {
 
-    final Games g = new Games();
+    final Games juegos = new Games();
     //final Matcher validarNombreDelJuego;
 
     try
@@ -242,7 +248,7 @@ public final class GameRequestHandler implements HttpHandler {
       final List< String> listaJuegos;
 
       // Pedimos la lista antes de que haga 200
-      listaJuegos = g.getGames();
+      listaJuegos = juegos.getGames();
 
       exchange.sendResponseHeaders(
               HTTP_OK,
@@ -253,16 +259,16 @@ public final class GameRequestHandler implements HttpHandler {
            os,
            StandardCharsets.UTF_8))
       {
-        for (final String j : listaJuegos)
+        for (final String juego : listaJuegos)
         {
-          final Matcher validarNombreDelJuego = PATRON_NOMBRE_JUEGO.matcher(j);
+          final Matcher validarNombreDelJuego = PATRON_NOMBRE_JUEGO.matcher(juego);
 
           if (!validarNombreDelJuego.matches())
           {
             LOGGER.warning("El nombre del juego no es valido desde la bbdd");
             continue;
           }
-          w.write(j);
+          w.write(juego);
           w.write("\n");
         }
       }
